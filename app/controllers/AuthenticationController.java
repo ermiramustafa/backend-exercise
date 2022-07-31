@@ -1,26 +1,18 @@
 package controllers;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.fasterxml.jackson.databind.JsonNode;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.google.inject.Inject;
 import models.User;
-import org.bson.types.ObjectId;
-import play.libs.Json;
+import play.http.HttpEntity;
 import play.mvc.Controller;
 import play.mvc.Http;
+import play.mvc.ResponseHeader;
 import play.mvc.Result;
+import services.AuthenticationService;
+import services.SerializationService;
+import services.UserService;
+import utils.DatabaseUtils;
 
-import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
-import java.security.Key;
-import java.sql.Date;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class AuthenticationController extends Controller {
     /*public Result authenticate(Http.Request request) {
@@ -60,22 +52,38 @@ public class AuthenticationController extends Controller {
         return ok(views.html.index.render());
     }*/
 
-    public Result authenticate(Http.Request request) {
-        JsonNode node =request.body().asJson();
-        try {
-            User user = new User("ermiramustafa", "password");
-            user.setId(new ObjectId());
-            String secret = "asdfSFS34wfsdfsdfSDSD32dfsddDDerQSNCK34SOWEK5354fdgdf4";
-            Algorithm algorithm = Algorithm.HMAC256("secret");
-            String token = JWT.create()
-                    .withClaim("id", String.valueOf(user.getId()))
-                    .sign(algorithm);
+//    public Result authenticate(Http.Request request) {
+//        JsonNode node =request.body().asJson();
+//        try {
+//            User user = new User("ermiramustafa", "password");
+//            user.setId(new ObjectId());
+//            String secret = "asdfSFS34wfsdfsdfSDSD32dfsddDDerQSNCK34SOWEK5354fdgdf4";
+//            Algorithm algorithm = Algorithm.HMAC256("secret");
+//            String token = JWT.create()
+//                    .withClaim("id", String.valueOf(user.getId()))
+//                    .sign(algorithm);
+//
+//        } catch (UnsupportedEncodingException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        return ok(views.html.index.render());
+//    }
+    @Inject
+    SerializationService service;
 
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+    @Inject
+    AuthenticationService authService;
 
-        return ok(views.html.index.render());
+    @Inject
+    UserService userService;
+
+    public CompletableFuture<Result> authenticate(Http.Request request) {
+        return service.parseBodyOfType(request, User.class)
+                .thenCompose(data -> userService.find(data))
+                .thenCompose(data -> authService.generateToken(data))
+                .thenApply(data -> new Result(new ResponseHeader(200, data), HttpEntity.NO_ENTITY))
+                .exceptionally(DatabaseUtils::throwableToResult);
     }
 
 }
