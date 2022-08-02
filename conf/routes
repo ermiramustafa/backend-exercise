@@ -11,3 +11,7 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 #Authenticates a user and returns a token
 POST     /api/mongoTest              controllers.HomeController.mongoTest(request: Request)
 POST     /api/authenticate           controllers.AuthenticationController.authenticate(request: Request)
+
+POST     /api/users           controllers.UserController.save(request: Request)
+GET     /api/users           controllers.UserController.all(request: Request)
+

@@ -8,7 +8,11 @@ import javax.validation.constraints.NotEmpty;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public @Data class Role extends BaseModel {
+public @Data
+class AuthenticationModel {
     @NotEmpty
-    private String name;
+    String username;
+
+    @NotEmpty
+    String password;
 }

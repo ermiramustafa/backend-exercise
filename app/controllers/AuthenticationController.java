@@ -1,12 +1,11 @@
 package controllers;
 
 import com.google.inject.Inject;
-import models.User;
-import play.http.HttpEntity;
+import models.AuthenticationModel;
 import play.mvc.Controller;
 import play.mvc.Http;
-import play.mvc.ResponseHeader;
 import play.mvc.Result;
+import play.mvc.Results;
 import services.AuthenticationService;
 import services.SerializationService;
 import services.UserService;
@@ -79,10 +78,10 @@ public class AuthenticationController extends Controller {
     UserService userService;
 
     public CompletableFuture<Result> authenticate(Http.Request request) {
-        return service.parseBodyOfType(request, User.class)
-                .thenCompose(data -> userService.find(data))
-                .thenCompose(data -> authService.generateToken(data))
-                .thenApply(data -> new Result(new ResponseHeader(200, data), HttpEntity.NO_ENTITY))
+        return service.parseBodyOfType(request, AuthenticationModel.class)
+                .thenCompose((data) -> authService.authenticate(data))
+                .thenCompose((data) -> service.toJsonNode(data))
+                .thenApply(Results::ok)
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
 
