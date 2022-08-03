@@ -25,5 +25,4 @@ public @Data class Dashboard extends BaseModel{
 
     private List<String> writeACL = new ArrayList<>();
 
-
 }

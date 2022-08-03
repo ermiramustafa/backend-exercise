@@ -6,9 +6,11 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.typesafe.config.Config;
+import models.codecs.*;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import play.Logger;
 
@@ -44,10 +46,17 @@ public abstract class MongoDriver implements IMongoDB {
 			database = this.connect();
 		}
 
+		ClassModel<Content> generalContentModel = ClassModel.builder(Content.class).enableDiscriminator(true).build();
+		ClassModel<Email> emailModel = ClassModel.builder(Email.class).enableDiscriminator(true).build();
+		ClassModel<Image> imageModel = ClassModel.builder(Image.class).enableDiscriminator(true).build();
+		ClassModel<Line> lineModel = ClassModel.builder(Line.class).enableDiscriminator(true).build();
+		ClassModel<Text> textModel = ClassModel.builder(Text.class).enableDiscriminator(true).build();
+
 		CodecProvider pojoCodecProvider =
 				PojoCodecProvider.builder()
 						.conventions(Collections.singletonList(ANNOTATION_CONVENTION))
 						.register("models")
+						.register(generalContentModel, emailModel, imageModel, lineModel, textModel)
 						.automatic(true)
 						.build();
 
