@@ -1,5 +1,6 @@
 package utils;
 
+import actions.Attributes;
 import models.Role;
 import models.User;
 import play.mvc.Http;
@@ -20,5 +21,9 @@ public class ServiceUtils {
                 .map(Role::getName)
                 .collect(Collectors.toList());
     }
+    public static User getUserFrom(Http.Request request) {
+        return request.attrs().get(Attributes.USER_TYPED_KEY);
+    }
+
 
 }

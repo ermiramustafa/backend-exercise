@@ -6,7 +6,6 @@ import com.google.common.base.Strings;
 import models.validators.HibernateValidator;
 import play.libs.Json;
 import play.mvc.Action;
-import play.mvc.BodyParser;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -15,7 +14,6 @@ import java.util.concurrent.CompletionStage;
 
 public class ValidationAction extends Action<Validation> {
     @Override
-    @BodyParser.Of(BodyParser.Json.class)
     public CompletionStage<Result> call(Http.Request request) {
         try{
             JsonNode body = request.body().asJson();

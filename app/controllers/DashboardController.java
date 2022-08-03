@@ -1,5 +1,6 @@
 package controllers;
 
+import actions.Authenticated;
 import models.Dashboard;
 import models.User;
 import mongo.IMongoDB;
@@ -13,6 +14,7 @@ import utils.DatabaseUtils;
 
 import java.util.concurrent.CompletableFuture;
 
+@Authenticated
 public class DashboardController extends Controller {
 
     @Inject

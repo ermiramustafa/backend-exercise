@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import lombok.ToString;
-import models.BaseModel;
 import mongo.serializers.ObjectIdDeSerializer;
 import mongo.serializers.ObjectIdStringSerializer;
 import org.bson.codecs.pojo.annotations.BsonDiscriminator;
@@ -31,7 +30,7 @@ public @Data class Content{
     @BsonId
     @JsonSerialize(using = ObjectIdStringSerializer.class)
     @JsonDeserialize(using = ObjectIdDeSerializer.class)
-    public ObjectId id;
+    private ObjectId id;
     String name;
     @BsonIgnore
     Type type = Type.NONE;

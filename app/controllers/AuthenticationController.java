@@ -1,11 +1,9 @@
 package controllers;
 
+import actions.Authenticated;
 import com.google.inject.Inject;
 import models.AuthenticationModel;
-import play.mvc.Controller;
-import play.mvc.Http;
-import play.mvc.Result;
-import play.mvc.Results;
+import play.mvc.*;
 import services.AuthenticationService;
 import services.SerializationService;
 import services.UserService;
@@ -77,6 +75,7 @@ public class AuthenticationController extends Controller {
     @Inject
     UserService userService;
 
+    @Authenticated
     public CompletableFuture<Result> authenticate(Http.Request request) {
         return service.parseBodyOfType(request, AuthenticationModel.class)
                 .thenCompose((data) -> authService.authenticate(data))

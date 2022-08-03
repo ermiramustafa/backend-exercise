@@ -1,17 +1,16 @@
 package services;
 
 import com.google.inject.Inject;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.result.InsertOneResult;
 import exceptions.RequestException;
-import models.Dashboard;
 import models.User;
+import models.codecs.Content;
 import mongo.IMongoDB;
+import org.bson.types.ObjectId;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
-import utils.ServiceUtils;
+import play.mvc.Http;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,90 +23,84 @@ public class DashboardContentService {
     @Inject
     IMongoDB mongoDB;
 
-    public CompletableFuture<Dashboard> save(User user, Dashboard dashboard) {
+    public CompletableFuture<Content> save(Content content, String dashId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 MongoCollection collection = mongoDB.getMongoDatabase()
-                        .getCollection("Dashboard", Dashboard.class);
-                dashboard.getReadACL().add(user.getId().toString());
-                dashboard.getWriteACL().add(user.getId().toString());
-                InsertOneResult toReturn = collection.insertOne(dashboard);
-                if(!toReturn.wasAcknowledged() || toReturn.getInsertedId() == null) {
-                    throw new CompletionException(new RequestException(400, Json.toJson("Could not insert user!!!!!")));
-                }
-                return dashboard;
+                        .getCollection("Content", Content.class);
+                content.setId(new ObjectId(dashId));
+                collection.insertOne(content);
+                return content;
             } catch (Exception ex) {
                 throw new CompletionException(new RequestException(400, Json.toJson("Could not insert user!!!!!")));
             }
         }, ec.current());
     }
 
-    public CompletableFuture<List<Dashboard>> all(User user) {
+    public CompletableFuture<List<Content>> all(User user, String id) {
         return CompletableFuture.supplyAsync(() -> {
-            try{
-                return mongoDB.getMongoDatabase()
-                        .getCollection("Dashboard", Dashboard.class)
-                        .find(Filters.or(
-                                Filters.in("readACL", user.getId().toString()),
-                                Filters.in("readACL", ServiceUtils.getRoles(user)),
-                                Filters.in("writeACL", user.getId().toString()),
-                                Filters.in("writeACL", ServiceUtils.getRoles(user)),
-                                Filters.and(
-                                        Filters.eq("readACL", new ArrayList<String>()),
-                                        Filters.eq("writeACL", new ArrayList<String>())
+                    try {
+                        MongoCollection<Content> collection = mongoDB
+                                .getMongoDatabase()
+                                .getCollection("content", Content.class);
+
+                        collection.find(Filters.or(
+                                        Filters.in("readACL", user.getId()),
+                                        Filters.in("readACL", user.getRoles()),
+                                        Filters.in("writeACL", user.getId()),
+                                        Filters.in("writeACL", user.getRoles()),
+                                        Filters.and(
+                                                Filters.eq("readACL", new ArrayList<>()),
+                                                Filters.eq("writeACL", new ArrayList<>()))
                                 )
-                        ))
-                        .into(new ArrayList<>());
-            }
-            catch(Exception ex) {
-                throw new CompletionException(new RequestException(400, Json.toJson("Something is wrong")));
-            }
-        }, ec.current());
+                        );
+                        return collection
+                                .find(Filters.eq("dashboardId",id))
+                                .into(new ArrayList<>());
+                    } catch (Exception e) {
+                        throw new CompletionException(new RequestException(Http.Status.INTERNAL_SERVER_ERROR, "Something went wrong."));
+                    }
+                }
+        );
     }
 
-    public CompletableFuture<Dashboard> update(Dashboard dashboard) {
+
+    public CompletableFuture<Content> update(Content content,String contentId, User user) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                MongoCollection<Dashboard> collection = mongoDB.getMongoDatabase()
-                        .getCollection("Dashboards", Dashboard.class);
-
-                FindIterable<Dashboard> toReturn = collection.find(Filters.eq("_id", dashboard.getId()));
-                Dashboard finalDashboard = toReturn.first();
-                if(finalDashboard == null) {
-                    throw new CompletionException(new RequestException(400, Json.toJson("Couldn't insert user")));
-                }
-                dashboard.getReadACL().addAll(finalDashboard.getReadACL());
-                dashboard.getWriteACL().addAll(finalDashboard.getWriteACL());
-                collection.replaceOne(Filters.eq("_id", dashboard.getId()), dashboard);
-                return dashboard;
-            } catch (NullPointerException | IllegalAccessError ex) {
-                throw new CompletionException(new RequestException(404, Json.toJson("USer not found")));
-            } catch (Exception ex) {
-                throw new CompletionException(new RequestException(400, Json.toJson("Couldn't insert user")));
+                content.setId(null);
+                return mongoDB.getMongoDatabase()
+                        .getCollection("Content", Content.class)
+                        .findOneAndReplace(Filters.and(
+                                Filters.eq("_id", new ObjectId(contentId)),
+                                Filters.or(
+                                        Filters.eq("writeACL", user.getId().toString()),
+                                        Filters.in("writeACL", user.getRoles()),
+                                        Filters.eq("writeACL", new ArrayList<>()))), content);
+            } catch (Exception e) {
+                throw new CompletionException(new RequestException(Http.Status.INTERNAL_SERVER_ERROR, e));
             }
-        }, ec.current());
+        });
     }
 
-    public CompletableFuture<Dashboard> delete(Dashboard dashboard, String id) {
+    public CompletableFuture<Content> delete(String id, User user) {
         return CompletableFuture.supplyAsync(() -> {
-            try{
-                MongoCollection<Dashboard> collection = mongoDB.getMongoDatabase()
-                        .getCollection("Dashboards", Dashboard.class);
-
-                FindIterable<Dashboard> toReturn = collection.find(Filters.eq("_id", dashboard.getId()));
-                Dashboard finalDashboard = toReturn.first();
-                if(finalDashboard == null) {
-                    throw new CompletionException(new RequestException(400, Json.toJson("Couldn't find!!!")));
-                }
-                collection.deleteOne(Filters.eq("_id", dashboard.getId()));
-                return dashboard;
-
-            }catch(NullPointerException | IllegalArgumentException ex) {
-                throw new CompletionException(new RequestException(404, Json.toJson("User not found")));
-            } catch(Exception ex) {
-                throw new CompletionException(new RequestException(400, Json.toJson("USer not found!!")));
+            try {
+                return mongoDB.getMongoDatabase()
+                        .getCollection("content", Content.class)
+                        .findOneAndDelete(Filters.and(
+                                Filters.eq("_id", new ObjectId(id)),
+                                Filters.or(
+                                        Filters.eq("writeACL", user.getId().toString()),
+                                        Filters.in("writeACL", user.getRoles()),
+                                        Filters.eq("writeACL", new ArrayList<>()))));
+            } catch (Exception e) {
+                throw new CompletionException(new RequestException(Http.Status.INTERNAL_SERVER_ERROR, e));
             }
-        }, ec.current());
+        });
     }
+
+
+
 
 }
