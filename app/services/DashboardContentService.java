@@ -68,32 +68,45 @@ public class DashboardContentService {
     public CompletableFuture<Content> update(Content content,String contentId, User user) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                content.setId(null);
-                return mongoDB.getMongoDatabase()
-                        .getCollection("Content", Content.class)
-                        .findOneAndReplace(Filters.and(
-                                Filters.eq("_id", new ObjectId(contentId)),
-                                Filters.or(
-                                        Filters.eq("writeACL", user.getId().toString()),
-                                        Filters.in("writeACL", user.getRoles()),
-                                        Filters.eq("writeACL", new ArrayList<>()))), content);
+                MongoCollection<Content> collection = mongoDB.getMongoDatabase()
+                        .getCollection("content", Content.class);
+
+                collection.find(Filters.or(
+                                Filters.in("readACL", user.getId()),
+                                Filters.in("readACL", user.getRoles()),
+                                Filters.in("writeACL", user.getId()),
+                                Filters.in("writeACL", user.getRoles()),
+                                Filters.and(
+                                        Filters.eq("readACL", new ArrayList<>()),
+                                        Filters.eq("writeACL", new ArrayList<>()))
+                        )
+                );
+                collection.replaceOne(Filters.eq("_id", new ObjectId(contentId)), content);
+                return content;
             } catch (Exception e) {
                 throw new CompletionException(new RequestException(Http.Status.INTERNAL_SERVER_ERROR, e));
             }
         });
     }
 
-    public CompletableFuture<Content> delete(String id, User user) {
+    public CompletableFuture<Content> delete(Content content, String id, User user) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return mongoDB.getMongoDatabase()
-                        .getCollection("content", Content.class)
-                        .findOneAndDelete(Filters.and(
-                                Filters.eq("_id", new ObjectId(id)),
-                                Filters.or(
-                                        Filters.eq("writeACL", user.getId().toString()),
-                                        Filters.in("writeACL", user.getRoles()),
-                                        Filters.eq("writeACL", new ArrayList<>()))));
+                MongoCollection<Content> collection = mongoDB
+                        .getMongoDatabase()
+                        .getCollection("content", Content.class);
+                collection.find(Filters.or(
+                                Filters.in("readACL", user.getId()),
+                                Filters.in("readACL", user.getRoles()),
+                                Filters.in("writeACL", user.getId()),
+                                Filters.in("writeACL", user.getRoles()),
+                                Filters.and(
+                                        Filters.eq("readACL", new ArrayList<>()),
+                                        Filters.eq("writeACL", new ArrayList<>()))
+                        )
+                );
+                collection.deleteOne(Filters.eq("_id",  new ObjectId(id)));
+                return content;
             } catch (Exception e) {
                 throw new CompletionException(new RequestException(Http.Status.INTERNAL_SERVER_ERROR, e));
             }

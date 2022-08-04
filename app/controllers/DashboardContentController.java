@@ -1,5 +1,6 @@
 package controllers;
 
+import actions.Authenticated;
 import com.google.inject.Inject;
 import models.codecs.Content;
 import play.mvc.Controller;
@@ -13,6 +14,7 @@ import utils.ServiceUtils;
 
 import java.util.concurrent.CompletableFuture;
 
+@Authenticated
 public class DashboardContentController extends Controller {
     @Inject
     SerializationService serializationService;
@@ -43,9 +45,10 @@ public class DashboardContentController extends Controller {
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
 
-    public CompletableFuture<Result> delete(Http.Request request, String id) {
-        return dcService.delete(id, ServiceUtils.getUserFrom(request))
-                .thenCompose((data) -> serializationService.toJsonNode(data))
+    public CompletableFuture<Result> delete(Http.Request request, String id, String conId) {
+        return serializationService.parseBodyOfType(request, Content.class)
+                .thenCompose(data -> dcService.delete(data, id,ServiceUtils.getUserFrom(request)))
+                .thenCompose(data -> serializationService.toJsonNode(data))
                 .thenApply(Results::ok)
                 .exceptionally(DatabaseUtils::throwableToResult);
     }

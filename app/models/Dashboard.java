@@ -3,6 +3,7 @@ package models;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import models.codecs.Content;
 import org.bson.types.ObjectId;
 
 import javax.validation.constraints.NotEmpty;
@@ -24,5 +25,7 @@ public @Data class Dashboard extends BaseModel{
     private List<String> readACL = new ArrayList<>();
 
     private List<String> writeACL = new ArrayList<>();
+
+    List<Content> content=new ArrayList<>();
 
 }

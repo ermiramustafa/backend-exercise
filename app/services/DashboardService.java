@@ -9,17 +9,16 @@ import com.mongodb.client.result.InsertOneResult;
 import exceptions.RequestException;
 import models.Dashboard;
 import models.User;
+import models.codecs.Content;
 import mongo.IMongoDB;
-import org.bson.Document;
-import org.bson.types.ObjectId;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
-import utils.ServiceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.stream.Collectors;
 
 public class DashboardService {
     @Inject
@@ -31,7 +30,7 @@ public class DashboardService {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 MongoCollection collection = mongoDB.getMongoDatabase()
-                        .getCollection("Dashboard", Dashboard.class);
+                        .getCollection("dashboard", Dashboard.class);
                 dashboard.getReadACL().add(user.getId().toString());
                 dashboard.getWriteACL().add(user.getId().toString());
                 InsertOneResult toReturn = collection.insertOne(dashboard);
@@ -48,19 +47,46 @@ public class DashboardService {
     public CompletableFuture<List<Dashboard>> all(User user) {
         return CompletableFuture.supplyAsync(() -> {
             try{
-                return mongoDB.getMongoDatabase()
-                        .getCollection("Dashboard", Dashboard.class)
-                        .find(Filters.or(
-                                Filters.in("readACL", user.getId().toString()),
-                                Filters.in("readACL", ServiceUtils.getRoles(user)),
-                                Filters.in("writeACL", user.getId().toString()),
-                                Filters.in("writeACL", ServiceUtils.getRoles(user)),
-                                Filters.and(
-                                        Filters.eq("readACL", new ArrayList<String>()),
-                                        Filters.eq("writeACL", new ArrayList<String>())
+                int limit = 100, skip = 0;
+                MongoCollection<Dashboard> collection = mongoDB
+                        .getMongoDatabase()
+                        .getCollection("dashboards", Dashboard.class);
+                List<Dashboard> dashboards = collection.find(Filters.or(
+                                        Filters.in("readACL", user.getId()),
+                                        Filters.in("readACL", user.getRoles()),
+                                        Filters.in("writeACL", user.getId()),
+                                        Filters.in("writeACL", user.getRoles()),
+                                        Filters.and(
+                                                Filters.eq("readACL", new ArrayList<>()),
+                                                Filters.eq("writeACL", new ArrayList<>()))
+
                                 )
-                        ))
+                        )
+                        .skip(skip)
+                        .limit(limit)
                         .into(new ArrayList<>());
+                List<String> dashId = dashboards.stream().map(x -> x.getId().toString()).collect(Collectors.toList());
+                List<Content> contents = mongoDB.getMongoDatabase()
+                        .getCollection("content", Content.class)
+                        .find(Filters.and(
+                                Filters.in("dashboardId", dashId),
+                                Filters.or(
+                                        Filters.in("readACL", user.getId()),
+                                        Filters.in("readACL", user.getRoles()),
+                                        Filters.in("writeACL", user.getId()),
+                                        Filters.in("writeACL", user.getRoles()),
+                                        Filters.and(
+                                                Filters.eq("readACL", new ArrayList<>()),
+                                                Filters.eq("writeACL", new ArrayList<>()))
+
+                                )))
+                        .into(new ArrayList<>());
+
+                dashboards.forEach(dashboard -> dashboard
+                        .setContent(
+                                contents
+                                        .stream().filter(x->x.getId().equals(dashboard.getId())).collect(Collectors.toList())));
+                return dashboards;
             }
             catch(Exception ex) {
                 throw new CompletionException(new RequestException(400, Json.toJson("Something is wrong")));
@@ -72,7 +98,7 @@ public class DashboardService {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 MongoCollection<Dashboard> collection = mongoDB.getMongoDatabase()
-                        .getCollection("Dashboards", Dashboard.class);
+                        .getCollection("dashboards", Dashboard.class);
 
                 FindIterable<Dashboard> toReturn = collection.find(Filters.eq("_id", dashboard.getId()));
                 Dashboard finalDashboard = toReturn.first();
@@ -95,7 +121,7 @@ public class DashboardService {
         return CompletableFuture.supplyAsync(() -> {
             try{
                 MongoCollection<Dashboard> collection = mongoDB.getMongoDatabase()
-                        .getCollection("Dashboards", Dashboard.class);
+                        .getCollection("dashboards", Dashboard.class);
 
                 FindIterable<Dashboard> toReturn = collection.find(Filters.eq("_id", dashboard.getId()));
                 Dashboard finalDashboard = toReturn.first();
