@@ -24,9 +24,6 @@ public class UserService {
     @Inject
     IMongoDB mongoDB;
 
-    @Inject
-    DBservice dbService;
-
     public CompletableFuture<List<User>> all () {
         return CompletableFuture.supplyAsync(() -> {
             try {

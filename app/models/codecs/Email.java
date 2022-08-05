@@ -2,6 +2,7 @@ package models.codecs;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.bson.codecs.pojo.annotations.BsonDiscriminator;
 
@@ -10,7 +11,7 @@ import javax.validation.constraints.NotEmpty;
 @BsonDiscriminator(key = "type", value="EMAIL")
 @AllArgsConstructor
 @NoArgsConstructor
-
+@EqualsAndHashCode(callSuper=false)
 public @Data class Email extends Content {
 
     @NotEmpty

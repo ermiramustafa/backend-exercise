@@ -30,7 +30,7 @@ public class DashboardService {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 MongoCollection collection = mongoDB.getMongoDatabase()
-                        .getCollection("dashboard", Dashboard.class);
+                        .getCollection("dashboards", Dashboard.class);
                 dashboard.getReadACL().add(user.getId().toString());
                 dashboard.getWriteACL().add(user.getId().toString());
                 InsertOneResult toReturn = collection.insertOne(dashboard);

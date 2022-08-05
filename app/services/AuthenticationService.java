@@ -30,7 +30,8 @@ public class AuthenticationService {
     @Inject
     IMongoDB mongoDB;
 
-    @Inject UserService userService;
+    @Inject
+    UserService userService;
 
 //    public CompletableFuture<HashMap<String, String>> generateToken(User user) {
 //        return CompletableFuture.supplyAsync(() -> {
