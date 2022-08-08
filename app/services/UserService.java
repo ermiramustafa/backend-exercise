@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+import static com.mongodb.client.model.Filters.eq;
+import static play.mvc.Http.Status.NOT_FOUND;
+
 public class UserService {
 
     @Inject
@@ -51,7 +54,7 @@ public class UserService {
                         .filter(Filters.eq("_id", new ObjectId(id)))
                         .first();
                 if (u1 == null) {
-                    throw new RequestException(Http.Status.NOT_FOUND, "Document with id: " + id + " not found!");
+                    throw new RequestException(NOT_FOUND, "Document with id: " + id + " not found!");
                 }
                 return u1;
 
@@ -74,7 +77,7 @@ public class UserService {
                         .findOneAndDelete(Filters.eq("_id", new ObjectId(id)));
 
                 if(user == null){
-                    throw new RequestException(Http.Status.NOT_FOUND, "Document with id: " + id + " not found!");
+                    throw new RequestException(NOT_FOUND, "Document with id: " + id + " not found!");
                 }
                 return user;
             }
@@ -112,6 +115,23 @@ public class UserService {
 
             } catch (Exception ex) {
                 throw new CompletionException(new RequestException(400, Json.toJson("Could not insert user!")));
+            }
+        }, ec.current());
+    }
+
+
+    public CompletableFuture<List<ObjectId>> getUserACL(String username) {
+        MongoCollection<User> collection =  mongoDB.getMongoDatabase().getCollection("users", User.class);
+        User user = collection.find(eq("username", username))
+                .first();
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                List<ObjectId> res = new ArrayList<>();
+                res.add(user.getId());
+                user.getRoles().forEach(x -> res.add(x.getId()));
+                return res;
+            } catch (NullPointerException ex) {
+                throw new CompletionException(new RequestException(NOT_FOUND, "Credentials are incorrect or the user doesn't exist!"));
             }
         }, ec.current());
     }
