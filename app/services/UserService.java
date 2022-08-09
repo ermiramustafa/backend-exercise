@@ -109,7 +109,7 @@ public class UserService {
             try {
                 MongoCollection<User> collection = mongoDB.getMongoDatabase()
                         .getCollection("users", User.class);
-                user.setId(new ObjectId());
+               // user.setId(new ObjectId());
                 collection.insertOne(user);
                 return user;
 
@@ -131,7 +131,7 @@ public class UserService {
                 user.getRoles().forEach(x -> res.add(x.getId()));
                 return res;
             } catch (NullPointerException ex) {
-                throw new CompletionException(new RequestException(NOT_FOUND, "Credentials are incorrect or the user doesn't exist!"));
+                throw new CompletionException(new RequestException(NOT_FOUND, "User doesnt exeist"));
             }
         }, ec.current());
     }

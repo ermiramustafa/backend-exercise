@@ -1,8 +1,10 @@
 package controllers;
 
+import actions.Validation;
 import com.google.inject.Inject;
 import models.User;
 import mongo.IMongoDB;
+import play.data.validation.Constraints;
 import play.mvc.BodyParser;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -44,6 +46,7 @@ public class UserController {
     }
 
     @BodyParser.Of(BodyParser.Json.class)
+    @Validation(type = User.class)
     public CompletableFuture<Result> update (Http.Request request, String id) {
         return serializationService.parseBodyOfType(request, User.class)
                 .thenCompose(user -> userService.update(id, user))
@@ -52,6 +55,7 @@ public class UserController {
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
     @BodyParser.Of(BodyParser.Json.class)
+    @Validation(type = User.class)
     public CompletableFuture<Result> save(Http.Request request) {
         return serializationService.parseBodyOfType(request, User.class)
                 .thenCompose((data) -> userService.save(data))

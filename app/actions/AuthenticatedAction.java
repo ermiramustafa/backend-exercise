@@ -31,7 +31,7 @@ public class AuthenticatedAction extends Action<Authenticated> {
     @Override
     public CompletionStage<Result> call(Http.Request request) {
         try {
-            String token = ServiceUtils.getTokenFrom(request);
+            /*String token = ServiceUtils.getTokenFrom(request);
             byte[] decodedBytes = Base64.getDecoder().decode(token.split("\\.")[1]);
             String decodedToken = new String(decodedBytes);
             String id = Json.parse(decodedToken).get("iss").asText();
@@ -50,6 +50,15 @@ public class AuthenticatedAction extends Action<Authenticated> {
                     .withIssuer(user.getId().toString())
                     .build();
             verifier.verify(token);
+
+            request = request.addAttr(Attributes.USER_TYPED_KEY, user);
+            return delegate.call(request);*/
+            String token = ServiceUtils.getTokenFromRequest(request);
+            User user = ServiceUtils
+                    .decodeToken(token)
+                    .thenCompose(ServiceUtils::getUserFromId)
+                    .thenCompose(x -> ServiceUtils.verify(x,token))
+                    .join();
 
             request = request.addAttr(Attributes.USER_TYPED_KEY, user);
             return delegate.call(request);

@@ -13,8 +13,8 @@ POST     /api/mongoTest              controllers.HomeController.mongoTest(reques
 POST     /api/authenticate           controllers.AuthenticationController.authenticate(request: Request)
 
 POST     /api/users           controllers.UserController.save(request: Request)
-GET     /api/users           controllers.UserController.all(request: Request)
-DELETE     /api/users           controllers.UserController.delete(request: Request, id:String)
+GET      /api/users           controllers.UserController.all(request: Request)
+DELETE   /api/users           controllers.UserController.delete(request: Request, id:String)
 
 
 #Dashboards
@@ -22,3 +22,4 @@ GET       /api/dashboard              controllers.DashboardController.all(reques
 #POST      /api/dashboard              controllers.DashboardController.save(request: Request)
 #PUT       /api/dashboard              controllers.DashboardController.update(request: Request)
 #DELETE    /api/dashboard              controllers.DashboardController.delete(request: Request, id:String)
+#GET        /api/chat/:roomId           controllers.ChatController.chat(roomId: String)

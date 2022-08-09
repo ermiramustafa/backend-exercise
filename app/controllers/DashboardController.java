@@ -1,6 +1,7 @@
 package controllers;
 
 import actions.Authenticated;
+import actions.Validation;
 import models.Dashboard;
 import models.User;
 import mongo.IMongoDB;
@@ -27,6 +28,7 @@ public class DashboardController extends Controller {
     DashboardService service;
 
     @BodyParser.Of(BodyParser.Json.class)
+    @Validation(type = Dashboard.class)
     public CompletableFuture<Result> save(Http.Request request, User user ) {
         return serializationService.parseBodyOfType(request, Dashboard.class)
                 .thenCompose((data) -> service.save(user, data))
@@ -42,6 +44,7 @@ public class DashboardController extends Controller {
                 .thenApply(Results::ok)
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
+    @Validation(type = Dashboard.class)
     public CompletableFuture<Result> update(Http.Request request) {
         return serializationService.parseBodyOfType(request, Dashboard.class)
                 .thenCompose((data) -> service.update(data))

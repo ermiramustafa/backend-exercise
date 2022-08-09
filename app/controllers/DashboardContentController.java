@@ -1,6 +1,7 @@
 package controllers;
 
 import actions.Authenticated;
+import actions.Validation;
 import com.google.inject.Inject;
 import models.codecs.Content;
 import play.mvc.Controller;
@@ -29,6 +30,7 @@ public class DashboardContentController extends Controller {
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
 
+    @Validation(type = Content.class)
     public CompletableFuture<Result> save(Http.Request request, String id) {
         return serializationService.parseBodyOfType(request, Content.class)
                 .thenCompose(data -> dcService.save(data, id))
@@ -37,6 +39,7 @@ public class DashboardContentController extends Controller {
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
 
+    @Validation(type = Content.class)
     public CompletableFuture<Result> update(Http.Request request, String id) {
         return serializationService.parseBodyOfType(request, Content.class)
                 .thenCompose((data) -> dcService.update(data, id, ServiceUtils.getUserFrom(request)))
