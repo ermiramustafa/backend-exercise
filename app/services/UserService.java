@@ -10,6 +10,7 @@ import org.bson.types.ObjectId;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
+import utils.Hash;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +47,7 @@ public class UserService {
         return CompletableFuture.supplyAsync(() -> {
             try{
                 if(!ObjectId.isValid(id)) {
-                    throw new RequestException(Http.Status.BAD_REQUEST, "invalid hexadecimal representation of an ObjectId: [" + id + "]");
+                    throw new RequestException(Http.Status.BAD_REQUEST, "badd");
                 }
                 User u1 =  mongoDB.getMongoDatabase()
                         .getCollection("users", User.class)
@@ -69,7 +70,7 @@ public class UserService {
         return CompletableFuture.supplyAsync(() -> {
             try{
                 if(!ObjectId.isValid(id)) {
-                    throw new RequestException(Http.Status.BAD_REQUEST, "invalid hexadecimal representation of an ObjectId: [" + id + "]");
+                    throw new RequestException(Http.Status.BAD_REQUEST, "badd2");
                 }
 
                 User user= mongoDB.getMongoDatabase()
@@ -92,8 +93,7 @@ public class UserService {
         {
             try{
                 if(!ObjectId.isValid(id)) {
-                    throw new RequestException(Http.Status.BAD_REQUEST,
-                            String.format("Invalid hexadecimal representation of an ObjectId: [%s]", id));
+                    throw new RequestException(Http.Status.BAD_REQUEST, "bad request");
                 }
                return mongoDB.getMongoDatabase()
                         .getCollection("users", User.class)
@@ -109,7 +109,8 @@ public class UserService {
             try {
                 MongoCollection<User> collection = mongoDB.getMongoDatabase()
                         .getCollection("users", User.class);
-               // user.setId(new ObjectId());
+//                user.setId(new ObjectId());
+                user.setPassword(Hash.createPassword(user.getPassword()));
                 collection.insertOne(user);
                 return user;
 
@@ -120,20 +121,20 @@ public class UserService {
     }
 
 
-    public CompletableFuture<List<ObjectId>> getUserACL(String username) {
-        MongoCollection<User> collection =  mongoDB.getMongoDatabase().getCollection("users", User.class);
-        User user = collection.find(eq("username", username))
-                .first();
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                List<ObjectId> res = new ArrayList<>();
-                res.add(user.getId());
-                user.getRoles().forEach(x -> res.add(x.getId()));
-                return res;
-            } catch (NullPointerException ex) {
-                throw new CompletionException(new RequestException(NOT_FOUND, "User doesnt exeist"));
-            }
-        }, ec.current());
-    }
+//    public CompletableFuture<List<ObjectId>> getUserACL(String username) {
+//        MongoCollection<User> collection =  mongoDB.getMongoDatabase().getCollection("users", User.class);
+//        User user = collection.find(eq("username", username))
+//                .first();
+//        return CompletableFuture.supplyAsync(() -> {
+//            try {
+//                List<ObjectId> res = new ArrayList<>();
+//                res.add(user.getId());
+//                res.add(user.getRoles());
+//                return res;
+//            } catch (NullPointerException ex) {
+//                throw new CompletionException(new RequestException(NOT_FOUND, "User doesnt exeist"));
+//            }
+//        }, ec.current());
+//    }
 
 }

@@ -27,7 +27,7 @@ public class DashboardContentService {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 MongoCollection collection = mongoDB.getMongoDatabase()
-                        .getCollection("Content", Content.class);
+                        .getCollection("content", Content.class);
                 content.setId(new ObjectId(dashId));
                 collection.insertOne(content);
                 return content;

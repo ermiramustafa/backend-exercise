@@ -8,28 +8,18 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.typesafe.config.Config;
 import exceptions.RequestException;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureException;
 import models.AuthenticationModel;
 import models.User;
 import mongo.IMongoDB;
-import org.bson.types.ObjectId;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
+import utils.Hash;
 
-import javax.inject.Singleton;
-import javax.xml.bind.DatatypeConverter;
-import java.util.Base64;
 import java.util.Date;
-import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-import static play.mvc.Http.Status.FORBIDDEN;
-
-@Singleton
 public class AuthenticationService {
     @Inject
     HttpExecutionContext ec;
@@ -76,36 +66,39 @@ public class AuthenticationService {
     public CompletableFuture<String> authenticate(AuthenticationModel login) {
         return CompletableFuture.supplyAsync(() -> {
             try{
+                System.out.println("ketuuu");
                 MongoCollection<User> collection = mongoDB.getMongoDatabase()
                         .getCollection("users", User.class);
                 String secret = config.getString("play.http.secret.key");
                 Algorithm algorithm = Algorithm.HMAC256(secret);
-
+                System.out.println("ketuuu22");
                 if(Strings.isNullOrEmpty(login.getUsername()) || Strings.isNullOrEmpty(login.getPassword())) {
                     throw new RequestException(Http.Status.BAD_REQUEST, "Empty fields");
                 }
+                System.out.println("ketuuu3");
+                User u1 = collection.find(
+                        Filters.eq("username", login.getUsername())
+                ).first();
+                System.out.println("ketuuu4");
 
-                User u1 = collection.find(Filters.and(
-                        Filters.eq("username", login.getUsername()),
-                        Filters.eq("password", login.getPassword())
-                )).first();
+                if(!Hash.checkPassword(login.getPassword(), u1.getPassword())) {
+                    throw new CompletionException(new RequestException(Http.Status.UNAUTHORIZED, Json.toJson("Bad Credentials!")));
+                }
 
-//                if(Hash.checkPassword(login.getPassword(), u1.getPassword())) {
-//                    throw new CompletionException(new RequestException(Http.Status.UNAUTHORIZED, Json.toJson("Bad Credentials!")));
-//                }
+                System.out.println("id e userit"+u1);
 
                 return JWT.create()
                         .withIssuer(u1.getId().toString())
-                        .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
+                        //.withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
                         .sign(algorithm);
-
             }catch (Exception ex) {
-                throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, "Could not fetch data!"));
+                ex.printStackTrace();
+                throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, "Could not fetch data-test!"));
             }
         }, ec.current());
     }
 
-    public String pToken(String jwt) {
+    /*public String pToken(String jwt) {
         try{
             return Jwts.parser()
                     .setSigningKey(DatatypeConverter.parseBase64Binary("encryption.private_key"))
@@ -138,7 +131,7 @@ public class AuthenticationService {
 
         User user = collection.find(Filters.eq("_id", new ObjectId(id))).first();
         return user;
-    }
+    }*/
 
 }
 

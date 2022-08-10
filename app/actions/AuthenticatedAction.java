@@ -1,23 +1,14 @@
 package actions;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.JWTCreationException;
 import com.google.inject.Inject;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
 import com.typesafe.config.Config;
 import exceptions.RequestException;
 import models.User;
 import mongo.IMongoDB;
 import utils.ServiceUtils;
-import org.bson.types.ObjectId;
 import play.libs.Json;
 import play.mvc.*;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 
@@ -56,21 +47,18 @@ public class AuthenticatedAction extends Action<Authenticated> {
             String token = ServiceUtils.getTokenFromRequest(request);
             User user = ServiceUtils
                     .decodeToken(token)
-                    .thenCompose(ServiceUtils::getUserFromId)
-                    .thenCompose(x -> ServiceUtils.verify(x,token))
+                    .thenCompose(x->ServiceUtils.getUserFromId(mongoDB,x))
+                    .thenCompose(x -> ServiceUtils.verify(config, x,token))
                     .join();
 
             request = request.addAttr(Attributes.USER_TYPED_KEY, user);
             return delegate.call(request);
-        } catch (JWTVerificationException ex) {
+        } catch (JWTCreationException ex) {
             ex.printStackTrace();
-            throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, Json.toJson("Invalid signature/claims.")));
-        } catch (UnsupportedEncodingException ex) {
-            ex.printStackTrace();
-            throw new RuntimeException(ex);
+            throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, Json.toJson("Invalid Signing configuration / Couldn't convert Claims.")));
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, Json.toJson("Invalid")));
+            throw new CompletionException(new RequestException(Http.Status.UNAUTHORIZED, Json.toJson("You are not authorized! Catch Related")));
         }
     }
 }

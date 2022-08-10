@@ -5,12 +5,10 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.inject.Inject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.typesafe.config.Config;
 import exceptions.RequestException;
-import models.Role;
 import models.User;
 import mongo.IMongoDB;
 import org.bson.types.ObjectId;
@@ -19,33 +17,30 @@ import play.mvc.Http;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
 
 public class ServiceUtils {
 
-    @Inject
-    static
-    IMongoDB mongoDB;
+//    @Inject
+//    static
+//    IMongoDB mongoDB;
 
-    @Inject
-    static
-    Config config;
+//    @Inject
+//    static
+//    Config config;
     public static String getTokenFrom (Http.Request request) {
         Optional<String> optionalToken = request.getHeaders().get("token");
         return optionalToken.orElse(null);
     }
 
-    public static List<String> getRoles(User user) {
-        return user.getRoles()
-                .stream()
-                .map(Role::getName)
-                .collect(Collectors.toList());
-    }
+//    public static List<String> getRoles(User user) {
+//        return user.getRoles()
+//                .stream()
+//                .map(x ->Role.getName())
+//                .collect(Collectors.toList());
+//    }
     public static User getUserFrom(Http.Request request) {
         return request.attrs().get(Attributes.USER_TYPED_KEY);
     }
@@ -64,7 +59,7 @@ public class ServiceUtils {
         );
     }
 
-    public static CompletableFuture<User> getUserFromId(String id) {
+    public static CompletableFuture<User> getUserFromId(IMongoDB mongoDB, String id) {
         return CompletableFuture.supplyAsync(() -> {
             MongoCollection<User> collection = mongoDB
                     .getMongoDatabase()
@@ -78,7 +73,7 @@ public class ServiceUtils {
         });
     }
 
-    public static CompletableFuture<User> verify(User user, String token) {
+    public static CompletableFuture<User> verify(Config config, User user, String token) {
         return CompletableFuture.supplyAsync(() -> {
             String secret = config.getString("play.http.secret.key");
             Algorithm algorithm = null;

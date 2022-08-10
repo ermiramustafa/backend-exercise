@@ -55,7 +55,7 @@ public class UserController {
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
     @BodyParser.Of(BodyParser.Json.class)
-    @Validation(type = User.class)
+    //@Validation(type = User.class)
     public CompletableFuture<Result> save(Http.Request request) {
         return serializationService.parseBodyOfType(request, User.class)
                 .thenCompose((data) -> userService.save(data))

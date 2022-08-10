@@ -1,5 +1,6 @@
 package actions;
 
+import models.AuthenticationModel;
 import models.User;
 import play.libs.typedmap.TypedKey;
 

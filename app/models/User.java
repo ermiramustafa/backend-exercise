@@ -5,20 +5,26 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.types.ObjectId;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public @Data class User extends BaseModel {
+@EqualsAndHashCode(callSuper = true)
+public class User extends BaseModel {
+
     @NotEmpty
-    private String username;
+    String username;
+
     @NotEmpty
-    private String password;
+    String password;
+
     //role???
-    private List<Role> roles = new ArrayList<>();
+    List<String> roles = new ArrayList<>();
 }

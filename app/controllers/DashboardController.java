@@ -15,7 +15,7 @@ import utils.DatabaseUtils;
 
 import java.util.concurrent.CompletableFuture;
 
-@Authenticated
+//@Authenticated
 public class DashboardController extends Controller {
 
     @Inject

@@ -33,18 +33,21 @@ public class ChatActor extends AbstractActor {
      * Room ID to pub/sub
      */
     private String roomId;
+
+    private boolean write;
     /**
      * Web socket represented from the front end
      */
     private ActorRef out;
 
-    public static Props props(ActorRef out, String roomId) {
-        return Props.create(ChatActor.class, () -> new ChatActor(out, roomId));
+    public static Props props(ActorRef out, String roomId, boolean write) {
+        return Props.create(ChatActor.class, () -> new ChatActor(out, roomId, write));
     }
 
-    private ChatActor(ActorRef out, String roomId) {
+    private ChatActor(ActorRef out, String roomId, boolean write) {
         this.roomId = roomId;
         this.out = out;
+        this.write = write;
         mediator.tell(new DistributedPubSubMediator.Subscribe(roomId, getSelf()), getSelf());
     }
 
@@ -127,9 +130,15 @@ public class ChatActor extends AbstractActor {
      */
     private void broadcast (String message) {
         // Publish new content on this room!
-        mediator.tell(
-                new DistributedPubSubMediator.Publish(roomId, new ChatActorProtocol.ChatMessage(message)),
-                getSelf()
-        );
+//        mediator.tell(
+//                new DistributedPubSubMediator.Publish(roomId, new ChatActorProtocol.ChatMessage(message)),
+//                getSelf()
+//        );
+        if (!write) {
+            out.tell("You have no access to message here!",getSelf());
+            return;
+        }
+        mediator.tell(new DistributedPubSubMediator
+                .Publish(roomId, new ChatActorProtocol.ChatMessage(message)),getSelf());
     }
 }
