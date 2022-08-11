@@ -1,5 +1,6 @@
 package controllers;
 
+import actions.Authenticated;
 import actions.Validation;
 import com.google.inject.Inject;
 import models.User;

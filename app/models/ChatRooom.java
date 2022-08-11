@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -14,6 +15,6 @@ import java.util.List;
 public @Data class ChatRooom extends BaseModel{
 
     private String name;
-    private List<ObjectId> readACL;
-    private List<ObjectId> writeACL;
+    private List<String> readACL = new ArrayList<>();
+    private List<String> writeACL = new ArrayList<>();
 }

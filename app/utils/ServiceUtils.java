@@ -42,6 +42,7 @@ public class ServiceUtils {
 //                .collect(Collectors.toList());
 //    }
     public static User getUserFrom(Http.Request request) {
+        System.out.println("attribs");
         return request.attrs().get(Attributes.USER_TYPED_KEY);
     }
 
@@ -53,7 +54,7 @@ public class ServiceUtils {
                     String decodedString = new String(decoded);
                     JsonNode node = play.libs.Json.parse(decodedString);
                     String id = node.get("iss").asText();
-
+            System.out.println("Id e userit decode token "+id);
                     return id;
                 }
         );
@@ -63,7 +64,7 @@ public class ServiceUtils {
         return CompletableFuture.supplyAsync(() -> {
             MongoCollection<User> collection = mongoDB
                     .getMongoDatabase()
-                    .getCollection("user", User.class);
+                    .getCollection("users", User.class);
             User user = collection.find(Filters.eq("_id", new ObjectId(id))).first();
 
             if (user == null) {
@@ -91,7 +92,8 @@ public class ServiceUtils {
     }
 
     public static String getTokenFromRequest(Http.Request request) {
-        Optional<String> optionalToken = request.getHeaders().get("token");
+        System.out.println("REQUEST IS "+ request);
+        Optional<String> optionalToken = request.getHeaders().get("Authorization");
         return optionalToken.orElse(null);
     }
 

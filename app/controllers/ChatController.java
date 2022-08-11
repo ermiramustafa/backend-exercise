@@ -108,9 +108,11 @@ public class ChatController extends Controller {
                     .thenCompose(x -> ServiceUtils.verify(config, x,token))
                     .join();
 
+            System.out.println("User is : " + user);
+
             MongoCollection<ChatRooom> collection =  mongoDB.getMongoDatabase()
                     .getCollection("rooms", ChatRooom.class);
-            ChatRooom room = collection.find(Filters.eq("id", roomId))
+            ChatRooom room = collection.find(Filters.eq("_id", new ObjectId(roomId)))
                     .first();
 
             if (room == null) {
@@ -131,7 +133,7 @@ public class ChatController extends Controller {
             }
             if (!read) {
                 //throw new CompletionException(new RequestException(Http.Status.FORBIDDEN, Json.toJson("")));
-                return CompletableFuture.completedFuture(F.Either.Left(forbidden("You don;t have access")));
+                return CompletableFuture.completedFuture(F.Either.Left(forbidden("You don't have access")));
             }
             boolean finalWrite = write;
             return CompletableFuture.completedFuture(F.Either.Right(ActorFlow.actorRef((out) -> ChatActor.props(out, roomId, finalWrite), actorSystem, materializer)));

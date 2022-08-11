@@ -9,6 +9,8 @@ import mongo.IMongoDB;
 import utils.ServiceUtils;
 import play.libs.Json;
 import play.mvc.*;
+
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 
@@ -44,7 +46,8 @@ public class AuthenticatedAction extends Action<Authenticated> {
 
             request = request.addAttr(Attributes.USER_TYPED_KEY, user);
             return delegate.call(request);*/
-            String token = ServiceUtils.getTokenFromRequest(request);
+            String token = ServiceUtils.getTokenFromRequest(request).replace("Bearer ", "");
+            System.out.println("TOKEN IS" + token);
             User user = ServiceUtils
                     .decodeToken(token)
                     .thenCompose(x->ServiceUtils.getUserFromId(mongoDB,x))
@@ -55,10 +58,12 @@ public class AuthenticatedAction extends Action<Authenticated> {
             return delegate.call(request);
         } catch (JWTCreationException ex) {
             ex.printStackTrace();
-            throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, Json.toJson("Invalid Signing configuration / Couldn't convert Claims.")));
+//            throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, Json.toJson("Signing error")));
+            return CompletableFuture.completedFuture(badRequest("Signin error"));
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw new CompletionException(new RequestException(Http.Status.UNAUTHORIZED, Json.toJson("You are not authorized! Catch Related")));
+            return CompletableFuture.completedFuture(badRequest("You are not authorized."));
+            //throw new CompletionException(new RequestException(Http.Status.UNAUTHORIZED, Json.toJson("Not Authorizeddd")));
         }
     }
 }

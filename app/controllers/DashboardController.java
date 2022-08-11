@@ -12,6 +12,7 @@ import play.mvc.*;
 import services.DashboardService;
 import services.SerializationService;
 import utils.DatabaseUtils;
+import utils.ServiceUtils;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -28,18 +29,26 @@ public class DashboardController extends Controller {
     DashboardService service;
 
     @BodyParser.Of(BodyParser.Json.class)
-    @Validation(type = Dashboard.class)
-    public CompletableFuture<Result> save(Http.Request request, User user ) {
+//    @Validation(type = Dashboard.class)
+    public CompletableFuture<Result> save(Http.Request request) {
         return serializationService.parseBodyOfType(request, Dashboard.class)
-                .thenCompose((data) -> service.save(user, data))
+                .thenCompose((data) -> service.save( data))
                 .thenCompose((data) -> serializationService.toJsonNode(data))
                 .thenApply(Results::ok)
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
 
+//    public CompletableFuture<Result> all(Http.Request request) {
+//        return serializationService.parseBodyOfType(request, User.class)
+//                .thenCompose((data) -> service.all(data))
+//                .thenCompose((data) -> serializationService.toJsonNode(data))
+//                .thenApply(Results::ok)
+//                .exceptionally(DatabaseUtils::throwableToResult);
+//    }
+
+    @Authenticated
     public CompletableFuture<Result> all(Http.Request request) {
-        return serializationService.parseBodyOfType(request, User.class)
-                .thenCompose((data) -> service.all(data))
+        return service.all(ServiceUtils.getUserFrom(request))
                 .thenCompose((data) -> serializationService.toJsonNode(data))
                 .thenApply(Results::ok)
                 .exceptionally(DatabaseUtils::throwableToResult);
@@ -61,4 +70,20 @@ public class DashboardController extends Controller {
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
 
+//    public CompletableFuture<Result> hierarchy(Http.Request request) {
+//        return  service.hierarchy()
+//                .thenCompose((data) -> serializationService.toJsonNode(data))
+//                .thenApply(Results::ok)
+//                .exceptionally(DatabaseUtils::throwableToResult);
+//    }
+
+    public CompletableFuture<Result> hierarchy() {
+        return service.hierarchy()
+                .thenCompose((data) -> serializationService.toJsonNode(data))
+                .thenApply(Results::ok)
+                .exceptionally(e -> {
+                    e.printStackTrace();
+                    return DatabaseUtils.throwableToResult(e);
+                });
+    }
 }

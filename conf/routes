@@ -19,7 +19,11 @@ DELETE   /api/users           controllers.UserController.delete(request: Request
 
 #Dashboards
 GET       /api/dashboard              controllers.DashboardController.all(request: Request)
-#POST      /api/dashboard              controllers.DashboardController.save(request: Request)
+POST      /api/dashboard             controllers.DashboardController.save(request: Request)
 PUT       /api/dashboard              controllers.DashboardController.update(request: Request)
 DELETE    /api/dashboard              controllers.DashboardController.delete(request: Request, id:String)
-GET        /api/chat/:roomId           controllers.ChatController.chat(roomId: String, token:String)
+GET        /api/chat/:roomId          controllers.ChatController.chat(roomId: String, token: String)
+
+
+
+GET        /api/dashboard/hierarchy         controllers.DashboardController.hierarchy()
