@@ -14,6 +14,9 @@ import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.types.ObjectId;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @ToString
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property="type", visible = true)
@@ -32,6 +35,7 @@ public @Data class Content{
     @JsonDeserialize(using = ObjectIdDeSerializer.class)
     private ObjectId id;
     String name;
+    ObjectId dashboardId;
     @BsonIgnore
     Type type = Type.NONE;
 }

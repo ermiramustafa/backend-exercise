@@ -9,6 +9,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import com.google.inject.Inject;
 import play.mvc.*;
+import scala.Int;
 import services.DashboardService;
 import services.SerializationService;
 import utils.DatabaseUtils;
@@ -47,8 +48,8 @@ public class DashboardController extends Controller {
 //    }
 
     @Authenticated
-    public CompletableFuture<Result> all(Http.Request request) {
-        return service.all(ServiceUtils.getUserFrom(request))
+    public CompletableFuture<Result> all(Http.Request request, int limit, int skip) {
+        return service.all(ServiceUtils.getUserFrom(request), limit, skip)
                 .thenCompose((data) -> serializationService.toJsonNode(data))
                 .thenApply(Results::ok)
                 .exceptionally(DatabaseUtils::throwableToResult);
@@ -77,6 +78,7 @@ public class DashboardController extends Controller {
 //                .exceptionally(DatabaseUtils::throwableToResult);
 //    }
 
+    @Authenticated
     public CompletableFuture<Result> hierarchy() {
         return service.hierarchy()
                 .thenCompose((data) -> serializationService.toJsonNode(data))

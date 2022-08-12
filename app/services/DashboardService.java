@@ -4,24 +4,34 @@ package services;
 import com.google.inject.Inject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.GraphLookupOptions;
 import com.mongodb.client.result.InsertOneResult;
 import exceptions.RequestException;
+import models.BaseModel;
 import models.Dashboard;
 import models.User;
 import models.codecs.Content;
 import mongo.IMongoDB;
 import org.bson.BsonNull;
 import org.bson.Document;
+import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
+import play.mvc.Http;
+import scala.Int;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
+
+import static com.mongodb.client.model.Filters.eq;
 
 public class DashboardService {
     @Inject
@@ -47,10 +57,10 @@ public class DashboardService {
         }, ec.current());
     }
 
-    public CompletableFuture<List<Dashboard>> all(User user) {
+    public CompletableFuture<List<Dashboard>> all(User user, int limit, int skip) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                int limit = 100, skip = 0;
+//                int limit = 100, skip = 0;
                 MongoCollection<Dashboard> collection = mongoDB
                         .getMongoDatabase()
                         .getCollection("dashboard", Dashboard.class);
@@ -60,9 +70,8 @@ public class DashboardService {
                                         Filters.in("writeACL", user.getId()),
                                         Filters.in("writeACL", user.getRoles()),
                                         Filters.and(
-                                                Filters.eq("readACL", new ArrayList<>()),
-                                                Filters.eq("writeACL", new ArrayList<>()))
-
+                                                eq("readACL", new ArrayList<>()),
+                                                eq("writeACL", new ArrayList<>()))
                                 )
                         )
                         .skip(skip)
@@ -79,8 +88,8 @@ public class DashboardService {
                                         Filters.in("writeACL", user.getId()),
                                         Filters.in("writeACL", user.getRoles()),
                                         Filters.and(
-                                                Filters.eq("readACL", new ArrayList<>()),
-                                                Filters.eq("writeACL", new ArrayList<>()))
+                                                eq("readACL", new ArrayList<>()),
+                                                eq("writeACL", new ArrayList<>()))
 
                                 )))
                         .into(new ArrayList<>());
@@ -101,16 +110,16 @@ public class DashboardService {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 MongoCollection<Dashboard> collection = mongoDB.getMongoDatabase()
-                        .getCollection("dashboards", Dashboard.class);
+                        .getCollection("dashboard", Dashboard.class);
 
-                FindIterable<Dashboard> toReturn = collection.find(Filters.eq("_id", dashboard.getId()));
+                FindIterable<Dashboard> toReturn = collection.find(eq("_id", dashboard.getId()));
                 Dashboard finalDashboard = toReturn.first();
                 if (finalDashboard == null) {
                     throw new CompletionException(new RequestException(400, Json.toJson("Couldn't insert user")));
                 }
                 dashboard.getReadACL().addAll(finalDashboard.getReadACL());
                 dashboard.getWriteACL().addAll(finalDashboard.getWriteACL());
-                collection.replaceOne(Filters.eq("_id", dashboard.getId()), dashboard);
+                collection.replaceOne(eq("_id", dashboard.getId()), dashboard);
                 return dashboard;
             } catch (NullPointerException | IllegalAccessError ex) {
                 throw new CompletionException(new RequestException(404, Json.toJson("USer not found")));
@@ -124,14 +133,14 @@ public class DashboardService {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 MongoCollection<Dashboard> collection = mongoDB.getMongoDatabase()
-                        .getCollection("dashboards", Dashboard.class);
+                        .getCollection("dashboard", Dashboard.class);
 
-                FindIterable<Dashboard> toReturn = collection.find(Filters.eq("_id", dashboard.getId()));
+                FindIterable<Dashboard> toReturn = collection.find(eq("_id", dashboard.getId()));
                 Dashboard finalDashboard = toReturn.first();
                 if (finalDashboard == null) {
                     throw new CompletionException(new RequestException(400, Json.toJson("Couldn't insert user")));
                 }
-                collection.deleteOne(Filters.eq("_id", dashboard.getId()));
+                collection.deleteOne(eq("_id", dashboard.getId()));
                 return dashboard;
 
             } catch (NullPointerException | IllegalArgumentException ex) {
@@ -145,21 +154,37 @@ public class DashboardService {
 
     public CompletableFuture<List<Dashboard>> hierarchy() {
         return CompletableFuture.supplyAsync(() -> {
-            List<Dashboard> dashboards = mongoDB
-                    .getMongoDatabase()
-                    .getCollection("dashboard", Dashboard.class)
-                    .aggregate(Arrays.asList(new Document("$match",
-                                    new Document("parentId",
-                                            new BsonNull())),
-                            new Document("$graphLookup",
-                                    new Document("from", "dashboard")
-                                            .append("startWith", "$_id")
-                                            .append("connectFromField", "_id")
-                                            .append("connectToField", "parentId")
-                                            .append("as", "children")
-                                            .append("depthField", "level"))))
+            MongoCollection<Dashboard> collection = mongoDB.getMongoDatabase()
+                    .getCollection("dashboard", Dashboard.class);
+
+            List<Bson> pipeline = new ArrayList<>();
+            pipeline.add(Aggregates.match(eq("parentId", new BsonNull())));
+            pipeline.add(Aggregates
+                    .graphLookup("dashboard"
+                            , "$_id"
+                            , "_id"
+                            , "parentId"
+                            , "children"
+                            , new GraphLookupOptions().depthField("level")));
+
+            List<Dashboard> dashboards = collection
+                    .aggregate(pipeline, Dashboard.class)
                     .into(new ArrayList<>());
 
+            //trying to add content
+            List<Dashboard> flatOption = dashboards.stream().map(Dashboard::getChildren)
+                    .flatMap(Collection::stream).collect(Collectors.toList());
+            flatOption.addAll(dashboards);
+            List<ObjectId> objid = flatOption.stream().map(BaseModel::getId).collect(Collectors.toList());
+
+            List<Content> contents = mongoDB.getMongoDatabase()
+                    .getCollection("content", Content.class)
+                    .find()
+                    .filter(Filters.in("dashboardId" , objid))
+                    .into(new ArrayList<>());
+            flatOption.forEach(dash -> {
+                dash.setContent(contents.stream().filter(x -> x.getDashboardId().equals(dash.getId())).collect(Collectors.toList()));
+            });
 //                List<Dashboard> children = dashboards.get(0).getChildren();
 
 //            dashboards.forEach(x -> {
@@ -181,19 +206,27 @@ public class DashboardService {
 //                    recursivePath(t, data);
 //                }
 //            });
-
-            Dashboard parent;
-            try {
-                parent = dashboards.get(0).clone();
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
-
-            dashboards.forEach(next -> {
-                recursivePath(parent, next.getChildren());
+            dashboards.forEach(dash -> {
+                List<Dashboard> list = dash.getChildren();
+                List<Dashboard> parentless = list.stream().filter(x -> x.getLevel() == 0).collect(Collectors.toList());
+                parentless.forEach(x -> recursivePath(x, list));
+                dash.setChildren(parentless);
             });
 
-            return List.of(parent);
+            return dashboards;
+
+//            Dashboard parent;
+//            try {
+//                parent = dashboards.get(0).clone();
+//            } catch (CloneNotSupportedException e) {
+//                throw new RuntimeException(e);
+//            }
+//
+//            dashboards.forEach(next -> {
+//                recursivePath(parent, next.getChildren());
+//            });
+//
+//            return List.of(parent);
         }, ec.current());
     }
 

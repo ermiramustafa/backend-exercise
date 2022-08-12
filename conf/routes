@@ -18,7 +18,7 @@ DELETE   /api/users           controllers.UserController.delete(request: Request
 
 
 #Dashboards
-GET       /api/dashboard              controllers.DashboardController.all(request: Request)
+GET       /api/dashboard              controllers.DashboardController.all(request: Request, limit: Int ?= 100, skip: Int ?= 0)
 POST      /api/dashboard             controllers.DashboardController.save(request: Request)
 PUT       /api/dashboard              controllers.DashboardController.update(request: Request)
 DELETE    /api/dashboard              controllers.DashboardController.delete(request: Request, id:String)

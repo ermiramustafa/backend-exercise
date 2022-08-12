@@ -89,7 +89,7 @@ public class AuthenticationService {
 
                 return JWT.create()
                         .withIssuer(u1.getId().toString())
-                        //.withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
+                        .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
                         .sign(algorithm);
             }catch (Exception ex) {
                 ex.printStackTrace();

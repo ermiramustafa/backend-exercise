@@ -29,10 +29,6 @@ public @Data class Dashboard extends BaseModel {
     @BsonProperty("children")
     List<Dashboard> children = new ArrayList<>();
 
-    public void addChild(Dashboard dashboard) {
-        children.add(dashboard);
-    }
-
     List<String> readACL = new ArrayList<>();
 
     List<String> writeACL = new ArrayList<>();
@@ -46,5 +42,8 @@ public @Data class Dashboard extends BaseModel {
         clone.setUpdatedAt(this.getUpdatedAt());
         clone.setParentId(this.parentId);
         return clone;
+    }
+    public void addChild(Dashboard dashboard) {
+        children.add(dashboard);
     }
 }
