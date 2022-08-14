@@ -2,7 +2,6 @@ package services;
 
 
 import com.google.inject.Inject;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
@@ -15,16 +14,13 @@ import models.User;
 import models.codecs.Content;
 import mongo.IMongoDB;
 import org.bson.BsonNull;
-import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
-import scala.Int;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -43,7 +39,7 @@ public class DashboardService {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 MongoCollection collection = mongoDB.getMongoDatabase()
-                        .getCollection("dashboards", Dashboard.class);
+                        .getCollection("dashboard", Dashboard.class);
 //                dashboard.getReadACL().add(user.getId().toString());
 //                dashboard.getWriteACL().add(user.getId().toString());
                 InsertOneResult toReturn = collection.insertOne(dashboard);
@@ -106,47 +102,60 @@ public class DashboardService {
         }, ec.current());
     }
 
-    public CompletableFuture<Dashboard> update(Dashboard dashboard) {
+    public CompletableFuture<Dashboard> update(Dashboard dashboard, String id, User user) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                MongoCollection<Dashboard> collection = mongoDB.getMongoDatabase()
+                System.out.println("Test");
+                MongoCollection<Dashboard> collection = mongoDB
+                        .getMongoDatabase()
                         .getCollection("dashboard", Dashboard.class);
-
-                FindIterable<Dashboard> toReturn = collection.find(eq("_id", dashboard.getId()));
-                Dashboard finalDashboard = toReturn.first();
-                if (finalDashboard == null) {
-                    throw new CompletionException(new RequestException(400, Json.toJson("Couldn't insert user")));
-                }
-                dashboard.getReadACL().addAll(finalDashboard.getReadACL());
-                dashboard.getWriteACL().addAll(finalDashboard.getWriteACL());
-                collection.replaceOne(eq("_id", dashboard.getId()), dashboard);
+                collection.find(Filters.and(
+                                Filters.in("readACL", user.getId()),
+                                Filters.in("readACL", user.getRoles()),
+                                Filters.in("writeACL", user.getId()),
+                                Filters.in("writeACL", user.getRoles()),
+                                Filters.and(
+                                        eq("readACL", new ArrayList<>()),
+                                        eq("writeACL", new ArrayList<>()))
+                        )
+                );
+                collection.replaceOne(eq("_id", new ObjectId(id)), dashboard);
                 return dashboard;
-            } catch (NullPointerException | IllegalAccessError ex) {
-                throw new CompletionException(new RequestException(404, Json.toJson("USer not found")));
-            } catch (Exception ex) {
-                throw new CompletionException(new RequestException(400, Json.toJson("Couldn't insert user")));
+            } catch (NullPointerException | CompletionException e) {
+                throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, Json.toJson("Bad Request")));
+            } catch (IllegalArgumentException e) {
+                throw new CompletionException(new RequestException(Http.Status.NOT_FOUND, Json.toJson("Not Founf")));
+            } catch (Exception e) {
+                throw new CompletionException(new RequestException(Http.Status.INTERNAL_SERVER_ERROR, Json.toJson("Server error.")));
             }
         }, ec.current());
     }
 
-    public CompletableFuture<Dashboard> delete(Dashboard dashboard, String id) {
+    public CompletableFuture<Dashboard> delete(Dashboard dashboard, String id, User user) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                MongoCollection<Dashboard> collection = mongoDB.getMongoDatabase()
+                MongoCollection<Dashboard> collection = mongoDB
+                        .getMongoDatabase()
                         .getCollection("dashboard", Dashboard.class);
+                collection.find(Filters.or(
+                                Filters.in("readACL", user.getId()),
+                                Filters.in("readACL", user.getRoles()),
+                                Filters.in("writeACL", user.getId()),
+                                Filters.in("writeACL", user.getRoles()),
+                                Filters.and(
+                                        eq("readACL", new ArrayList<>()),
+                                        eq("writeACL", new ArrayList<>()))
 
-                FindIterable<Dashboard> toReturn = collection.find(eq("_id", dashboard.getId()));
-                Dashboard finalDashboard = toReturn.first();
-                if (finalDashboard == null) {
-                    throw new CompletionException(new RequestException(400, Json.toJson("Couldn't insert user")));
-                }
-                collection.deleteOne(eq("_id", dashboard.getId()));
+                        )
+                );
+                collection.deleteOne(eq("_id", new ObjectId(id)));
                 return dashboard;
-
-            } catch (NullPointerException | IllegalArgumentException ex) {
-                throw new CompletionException(new RequestException(404, Json.toJson("User not found")));
-            } catch (Exception ex) {
-                throw new CompletionException(new RequestException(400, Json.toJson("USer not found!!")));
+            } catch (NullPointerException | CompletionException e) {
+                throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, Json.toJson("Bad Request")));
+            } catch (IllegalArgumentException e) {
+                throw new CompletionException(new RequestException(Http.Status.NOT_FOUND, Json.toJson("Not Founf")));
+            } catch (Exception e) {
+                throw new CompletionException(new RequestException(Http.Status.INTERNAL_SERVER_ERROR, Json.toJson("Server error.")));
             }
         }, ec.current());
     }

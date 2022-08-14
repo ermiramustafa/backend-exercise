@@ -1,15 +1,10 @@
 package controllers;
 
 import actions.Authenticated;
-import actions.Validation;
-import models.Dashboard;
-import models.User;
-import mongo.IMongoDB;
-import play.mvc.Http;
-import play.mvc.Result;
 import com.google.inject.Inject;
+import models.Dashboard;
+import mongo.IMongoDB;
 import play.mvc.*;
-import scala.Int;
 import services.DashboardService;
 import services.SerializationService;
 import utils.DatabaseUtils;
@@ -17,7 +12,7 @@ import utils.ServiceUtils;
 
 import java.util.concurrent.CompletableFuture;
 
-//@Authenticated
+@Authenticated
 public class DashboardController extends Controller {
 
     @Inject
@@ -28,6 +23,7 @@ public class DashboardController extends Controller {
 
     @Inject
     DashboardService service;
+
 
     @BodyParser.Of(BodyParser.Json.class)
 //    @Validation(type = Dashboard.class)
@@ -47,26 +43,31 @@ public class DashboardController extends Controller {
 //                .exceptionally(DatabaseUtils::throwableToResult);
 //    }
 
-    @Authenticated
+//    @Authenticated
     public CompletableFuture<Result> all(Http.Request request, int limit, int skip) {
         return service.all(ServiceUtils.getUserFrom(request), limit, skip)
                 .thenCompose((data) -> serializationService.toJsonNode(data))
                 .thenApply(Results::ok)
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
-    @Validation(type = Dashboard.class)
-    public CompletableFuture<Result> update(Http.Request request) {
+    //@Validation(type = Dashboard.class)
+    public CompletableFuture<Result> update(Http.Request request, String id) {
+        System.out.println("Testcontro");
         return serializationService.parseBodyOfType(request, Dashboard.class)
-                .thenCompose((data) -> service.update(data))
-                .thenCompose((data) -> serializationService.toJsonNode(data))
+                .thenCompose(data -> service.update(data, id, ServiceUtils.getUserFrom(request)))
+                .thenCompose(data -> serializationService.toJsonNode(data))
                 .thenApply(Results::ok)
-                .exceptionally(DatabaseUtils::throwableToResult);
+                .exceptionally(e -> {
+                    e.printStackTrace();
+                    return DatabaseUtils.throwableToResult(e);
+                });
+
     }
 
     public CompletableFuture<Result> delete(Http.Request request, String id) {
         return serializationService.parseBodyOfType(request, Dashboard.class)
-                .thenCompose((data) -> service.delete(data, id))
-                .thenCompose((data) -> serializationService.toJsonNode(data))
+                .thenCompose(data -> service.delete(data, id, ServiceUtils.getUserFrom(request)))
+                .thenCompose(data -> serializationService.toJsonNode(data))
                 .thenApply(Results::ok)
                 .exceptionally(DatabaseUtils::throwableToResult);
     }

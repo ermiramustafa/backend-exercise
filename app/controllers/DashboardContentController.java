@@ -1,7 +1,6 @@
 package controllers;
 
 import actions.Authenticated;
-import actions.Validation;
 import com.google.inject.Inject;
 import models.codecs.Content;
 import play.mvc.Controller;
@@ -30,16 +29,16 @@ public class DashboardContentController extends Controller {
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
 
-    @Validation(type = Content.class)
-    public CompletableFuture<Result> save(Http.Request request, String id) {
+//    @Validation(type = Content.class)
+    public CompletableFuture<Result> save(Http.Request request) {
         return serializationService.parseBodyOfType(request, Content.class)
-                .thenCompose(data -> dcService.save(data, id))
+                .thenCompose(data -> dcService.save(data))
                 .thenCompose(data -> serializationService.toJsonNode(data))
                 .thenApply(Results::ok)
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
 
-    @Validation(type = Content.class)
+//    @Validation(type = Content.class)
     public CompletableFuture<Result> update(Http.Request request, String id) {
         return serializationService.parseBodyOfType(request, Content.class)
                 .thenCompose((data) -> dcService.update(data, id, ServiceUtils.getUserFrom(request)))
@@ -48,7 +47,7 @@ public class DashboardContentController extends Controller {
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
 
-    public CompletableFuture<Result> delete(Http.Request request, String id, String conId) {
+    public CompletableFuture<Result> delete(Http.Request request, String id) {
         return serializationService.parseBodyOfType(request, Content.class)
                 .thenCompose(data -> dcService.delete(data, id,ServiceUtils.getUserFrom(request)))
                 .thenCompose(data -> serializationService.toJsonNode(data))

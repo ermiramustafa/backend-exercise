@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-import static com.mongodb.client.model.Filters.eq;
 import static play.mvc.Http.Status.NOT_FOUND;
 
 public class UserService {
@@ -92,6 +91,7 @@ public class UserService {
         return CompletableFuture.supplyAsync(() ->
         {
             try{
+                System.out.println("Testo testo testo");
                 if(!ObjectId.isValid(id)) {
                     throw new RequestException(Http.Status.BAD_REQUEST, "bad request");
                 }

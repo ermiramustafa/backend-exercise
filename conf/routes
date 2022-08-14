@@ -14,15 +14,22 @@ POST     /api/authenticate           controllers.AuthenticationController.authen
 
 POST     /api/users           controllers.UserController.save(request: Request)
 GET      /api/users           controllers.UserController.all(request: Request)
-DELETE   /api/users           controllers.UserController.delete(request: Request, id:String)
+DELETE   /api/users/:id           controllers.UserController.delete(request: Request, id:String)
+PUT      /api/users/:id           controllers.UserController.update(request: Request, id:String)
 
 
 #Dashboards
-GET       /api/dashboard              controllers.DashboardController.all(request: Request, limit: Int ?= 100, skip: Int ?= 0)
+GET       /api/dashboard             controllers.DashboardController.all(request: Request, limit: Int ?= 20, skip: Int ?= 0)
 POST      /api/dashboard             controllers.DashboardController.save(request: Request)
-PUT       /api/dashboard              controllers.DashboardController.update(request: Request)
-DELETE    /api/dashboard              controllers.DashboardController.delete(request: Request, id:String)
-GET        /api/chat/:roomId          controllers.ChatController.chat(roomId: String, token: String)
+PUT       /api/dashboard/:id         controllers.DashboardController.update(request: Request, id:String)
+DELETE    /api/dashboard/:id         controllers.DashboardController.delete(request: Request, id:String)
+GET       /api/chat/:roomId          controllers.ChatController.chat(roomId: String, token: String)
+
+#Contents
+GET           /api/content/:id              controllers.DashboardContentController.all(request: Request,id:String)
+POST          /api/content                  controllers.DashboardContentController.save(request: Request)
+PUT           /api/content/:id              controllers.DashboardContentController.update(request: Request, id:String)
+DELETE        /api/content/:id              controllers.DashboardContentController.delete(request: Request, id:String)
 
 
 

@@ -23,12 +23,12 @@ public class DashboardContentService {
     @Inject
     IMongoDB mongoDB;
 
-    public CompletableFuture<Content> save(Content content, String dashId) {
+    public CompletableFuture<Content> save(Content content) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 MongoCollection collection = mongoDB.getMongoDatabase()
                         .getCollection("content", Content.class);
-                content.setId(new ObjectId(dashId));
+                content.setId(new ObjectId());
                 collection.insertOne(content);
                 return content;
             } catch (Exception ex) {
@@ -108,6 +108,7 @@ public class DashboardContentService {
                 collection.deleteOne(Filters.eq("_id",  new ObjectId(id)));
                 return content;
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new CompletionException(new RequestException(Http.Status.INTERNAL_SERVER_ERROR, e));
             }
         });
