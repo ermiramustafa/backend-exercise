@@ -2,23 +2,15 @@ package controllers;
 
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.client.MongoCollection;
 import com.typesafe.config.Config;
-import actions.Authenticated;
 import actors.ChatActor;
 import exceptions.RequestException;
 import models.ChatRooom;
 import models.User;
 import mongo.IMongoDB;
 import services.AuthenticationService;
-//import io.exercise.api.services.ChatService;
-import services.DashboardService;
 import services.SerializationService;
-import services.UserService;
 import utils.ServiceUtils;
 import org.bson.types.ObjectId;
 import play.libs.F;
@@ -28,21 +20,12 @@ import play.mvc.*;
 import com.mongodb.client.model.Filters;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 
 public class ChatController extends Controller {
-
-    @Inject
-    SerializationService serializationService;
-
     @Inject
     private ActorSystem actorSystem;
     @Inject
@@ -54,9 +37,6 @@ public class ChatController extends Controller {
     @Inject
 
     Config config;
-
-    @Inject
-    AuthenticationService auth;
 
 
     //    public WebSocket chat(Http.Request request,String roomId) {
@@ -141,8 +121,6 @@ public class ChatController extends Controller {
 
         });
     }
-
-
 }
 
 

@@ -27,6 +27,12 @@ public class UserService {
     @Inject
     IMongoDB mongoDB;
 
+    /**
+     * Function that returns all users
+     *
+     * @param
+     * @return
+     */
     public CompletableFuture<List<User>> all() {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -42,11 +48,18 @@ public class UserService {
         }, ec.current());
     }
 
+
+    /**
+     * Function that returns a user by a given Id
+     *
+     * @param id
+     * @return user
+     */
     public CompletableFuture<User> userById(String id) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 if (!ObjectId.isValid(id)) {
-                    throw new RequestException(Http.Status.BAD_REQUEST, "badd");
+                    throw new RequestException(Http.Status.BAD_REQUEST, "Bad Request!");
                 }
                 User u1 = mongoDB.getMongoDatabase()
                         .getCollection("users", User.class)
@@ -64,12 +77,17 @@ public class UserService {
         }, ec.current());
     }
 
-
+    /**
+     * Function that is used to delete a user
+     *
+     * @param id
+     * @return deletedUser
+     */
     public CompletableFuture<User> delete(String id) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 if (!ObjectId.isValid(id)) {
-                    throw new RequestException(Http.Status.BAD_REQUEST, "badd2");
+                    throw new RequestException(Http.Status.BAD_REQUEST, "Bad Request!");
                 }
 
                 User user = mongoDB.getMongoDatabase()
@@ -86,13 +104,19 @@ public class UserService {
         }, ec.current());
     }
 
+    /**
+     * Function that updates a user
+     *
+     * @param id, user
+     * @return UpdatedUser
+     */
     public CompletableFuture<User> update(String id, User user) {
         return CompletableFuture.supplyAsync(() ->
         {
             try {
                 System.out.println("Testo testo testo");
                 if (!ObjectId.isValid(id)) {
-                    throw new RequestException(Http.Status.BAD_REQUEST, "bad request");
+                    throw new RequestException(Http.Status.BAD_REQUEST, "Bad Request!");
                 }
                 return mongoDB.getMongoDatabase()
                         .getCollection("users", User.class)
@@ -103,6 +127,12 @@ public class UserService {
         }, ec.current());
     }
 
+    /**
+     * Function that saves a user
+     *
+     * @param user
+     * @return newUser
+     */
     public CompletableFuture<User> save(User user) {
         return CompletableFuture.supplyAsync(() -> {
             try {

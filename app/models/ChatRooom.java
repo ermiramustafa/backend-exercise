@@ -11,8 +11,9 @@ import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = "id")
-public @Data class ChatRooom extends BaseModel {
+@Data
+//@EqualsAndHashCode(of = "id")
+public class ChatRooom extends BaseModel {
 
     private String name;
     private List<String> readACL = new ArrayList<>();

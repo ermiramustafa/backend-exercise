@@ -20,6 +20,8 @@ import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+import static play.mvc.Results.notFound;
+
 public class AuthenticationService {
     @Inject
     HttpExecutionContext ec;
@@ -30,6 +32,12 @@ public class AuthenticationService {
     @Inject
     IMongoDB mongoDB;
 
+    /**
+     * Creates a token that contains user informaton
+     *
+     * @param login
+     * @return token
+     */
     public CompletableFuture<String> authenticate(AuthenticationModel login) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -40,13 +48,19 @@ public class AuthenticationService {
                 Algorithm algorithm = Algorithm.HMAC256(secret);
                 System.out.println("ketuuu22");
                 if (Strings.isNullOrEmpty(login.getUsername()) || Strings.isNullOrEmpty(login.getPassword())) {
-                    throw new RequestException(Http.Status.BAD_REQUEST, "Empty fields");
+                    throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, "Empty fields"));
                 }
                 System.out.println("ketuuu3");
                 User u1 = collection.find(
                         Filters.eq("username", login.getUsername())
                 ).first();
                 System.out.println("ketuuu4");
+
+                if (u1 == null) {
+                    throw new CompletionException(new RequestException(Http.Status.NOT_FOUND, "This user doesn't exist!"));
+//                    return CompletableFuture.completedFuture(notFound("This user doesn't exist!"));
+                }
+                System.out.println("ketu 55");
 
                 if (!Hash.checkPassword(login.getPassword(), u1.getPassword())) {
                     throw new CompletionException(new RequestException(Http.Status.UNAUTHORIZED, Json.toJson("Bad Credentials!")));

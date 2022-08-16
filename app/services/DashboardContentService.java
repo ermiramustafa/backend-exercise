@@ -23,6 +23,13 @@ public class DashboardContentService {
     @Inject
     IMongoDB mongoDB;
 
+    /**
+     * Saves(Creates) the content of a dashboard in database
+     *
+     * @param content
+     * @return content
+     */
+
     public CompletableFuture<Content> save(Content content) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -37,6 +44,12 @@ public class DashboardContentService {
         }, ec.current());
     }
 
+    /**
+     * Returns content of a dashboard
+     *
+     * @param user, id
+     * @return content
+     */
     public CompletableFuture<List<Content>> all(User user, String id) {
         return CompletableFuture.supplyAsync(() -> {
                     try {
@@ -64,7 +77,12 @@ public class DashboardContentService {
         );
     }
 
-
+    /**
+     * Updates content of a dashboard
+     *
+     * @param content, contentId, user
+     * @return content
+     */
     public CompletableFuture<Content> update(Content content, String contentId, User user) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -88,7 +106,12 @@ public class DashboardContentService {
             }
         });
     }
-
+    /**
+     * Deletes content of a dashboard
+     *
+     * @param content, id, user
+     * @return content
+     */
     public CompletableFuture<Content> delete(Content content, String id, User user) {
         return CompletableFuture.supplyAsync(() -> {
             try {

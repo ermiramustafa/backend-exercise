@@ -35,6 +35,12 @@ public class DashboardService {
     @Inject
     IMongoDB mongoDB;
 
+    /**
+     * Creates a new dashboard
+     *
+     * @param dashboard
+     * @return dashboard
+     */
     public CompletableFuture<Dashboard> save(Dashboard dashboard) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -53,6 +59,12 @@ public class DashboardService {
         }, ec.current());
     }
 
+    /**
+     * Returns all dashboards
+     *
+     * @param user, limit, skip
+     * @return dashboards
+     */
     public CompletableFuture<List<Dashboard>> all(User user, int limit, int skip) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -102,6 +114,12 @@ public class DashboardService {
         }, ec.current());
     }
 
+    /**
+     * Updates a specific dashboard
+     *
+     * @param dashboard, id, user
+     * @return updatedDashboard
+     */
     public CompletableFuture<Dashboard> update(Dashboard dashboard, String id, User user) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -131,6 +149,12 @@ public class DashboardService {
         }, ec.current());
     }
 
+    /**
+     * Deletes a specific dashboard
+     *
+     * @param dashboard, id, user
+     * @return deletedDashboard
+     */
     public CompletableFuture<Dashboard> delete(Dashboard dashboard, String id, User user) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -145,7 +169,6 @@ public class DashboardService {
                                 Filters.and(
                                         eq("readACL", new ArrayList<>()),
                                         eq("writeACL", new ArrayList<>()))
-
                         )
                 );
                 collection.deleteOne(eq("_id", new ObjectId(id)));
@@ -153,13 +176,19 @@ public class DashboardService {
             } catch (NullPointerException | CompletionException e) {
                 throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, Json.toJson("Bad Request")));
             } catch (IllegalArgumentException e) {
-                throw new CompletionException(new RequestException(Http.Status.NOT_FOUND, Json.toJson("Not Founf")));
+                throw new CompletionException(new RequestException(Http.Status.NOT_FOUND, Json.toJson("Not Found!")));
             } catch (Exception e) {
-                throw new CompletionException(new RequestException(Http.Status.INTERNAL_SERVER_ERROR, Json.toJson("Server error.")));
+                throw new CompletionException(new RequestException(Http.Status.INTERNAL_SERVER_ERROR, Json.toJson("Server error!")));
             }
         }, ec.current());
     }
 
+    /**
+     * Returns dashboards in hierarchical manner together with its "items"
+     *
+     * @param
+     * @return dashboard
+     */
 
     public CompletableFuture<List<Dashboard>> hierarchy() {
         return CompletableFuture.supplyAsync(() -> {
@@ -259,6 +288,12 @@ public class DashboardService {
 ////        }
 //    }
 
+    /**
+     * Recursive function that is used to get all children of a dashboard
+     *
+     * @param parent, child
+     * @return
+     */
     public void recursivePath(Dashboard parent, List<Dashboard> child) {
         CompletableFuture.supplyAsync(() -> {
             for (Dashboard d : child) {
