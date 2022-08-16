@@ -12,13 +12,13 @@ import javax.validation.constraints.NotEmpty;
 @BsonDiscriminator(key = "type", value = "IMAGE")
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 public @Data class Image extends Content {
 
     @NotEmpty
     private String url;
 
-    public Type getType(){
+    public Type getType() {
         return Type.IMAGE;
     }
 }

@@ -16,7 +16,7 @@ import org.bson.types.ObjectId;
 
 import java.io.Serializable;
 
-@EqualsAndHashCode(of={"id"})
+@EqualsAndHashCode(of = {"id"})
 @JsonInclude(Include.NON_NULL)
 public @Data class BaseModel implements Cloneable, Serializable {
     @BsonId

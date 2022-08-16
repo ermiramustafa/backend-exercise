@@ -8,10 +8,10 @@ import org.bson.codecs.pojo.annotations.BsonDiscriminator;
 
 import javax.validation.constraints.NotEmpty;
 
-@BsonDiscriminator(key = "type", value="EMAIL")
+@BsonDiscriminator(key = "type", value = "EMAIL")
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 public @Data class Email extends Content {
 
     @NotEmpty

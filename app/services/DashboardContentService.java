@@ -55,7 +55,7 @@ public class DashboardContentService {
                                 )
                         );
                         return collection
-                                .find(Filters.eq("dashboardId",id))
+                                .find(Filters.eq("dashboardId", id))
                                 .into(new ArrayList<>());
                     } catch (Exception e) {
                         throw new CompletionException(new RequestException(Http.Status.INTERNAL_SERVER_ERROR, "Something went wrong."));
@@ -65,7 +65,7 @@ public class DashboardContentService {
     }
 
 
-    public CompletableFuture<Content> update(Content content,String contentId, User user) {
+    public CompletableFuture<Content> update(Content content, String contentId, User user) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 MongoCollection<Content> collection = mongoDB.getMongoDatabase()
@@ -105,7 +105,7 @@ public class DashboardContentService {
                                         Filters.eq("writeACL", new ArrayList<>()))
                         )
                 );
-                collection.deleteOne(Filters.eq("_id",  new ObjectId(id)));
+                collection.deleteOne(Filters.eq("_id", new ObjectId(id)));
                 return content;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -113,8 +113,6 @@ public class DashboardContentService {
             }
         });
     }
-
-
 
 
 }

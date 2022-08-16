@@ -8,7 +8,7 @@ import javax.validation.constraints.NotEmpty;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 public @lombok.Data class Text extends Content {
     @NotEmpty
     private String text;

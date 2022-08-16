@@ -19,7 +19,7 @@ import java.util.List;
 
 
 @ToString
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property="type", visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Email.class, name = "EMAIL"),
         @JsonSubTypes.Type(value = Image.class, name = "IMAGE"),
@@ -29,7 +29,7 @@ import java.util.List;
 
 @BsonDiscriminator(key = "type", value = "NONE")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public @Data class Content{
+public @Data class Content {
     @BsonId
     @JsonSerialize(using = ObjectIdStringSerializer.class)
     @JsonDeserialize(using = ObjectIdDeSerializer.class)

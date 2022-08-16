@@ -3,34 +3,34 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.HomeController.index()
+GET           /                               controllers.HomeController.index()
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET           /assets/*file                   controllers.Assets.versioned(path="/public", file: Asset)
 
 #Authenticates a user and returns a token
-POST     /api/mongoTest              controllers.HomeController.mongoTest(request: Request)
-POST     /api/authenticate           controllers.AuthenticationController.authenticate(request: Request)
+POST          /api/mongoTest                  controllers.HomeController.mongoTest(request: Request)
+POST          /api/authenticate               controllers.AuthenticationController.authenticate(request: Request)
 
-POST     /api/users           controllers.UserController.save(request: Request)
-GET      /api/users           controllers.UserController.all(request: Request)
-DELETE   /api/users/:id           controllers.UserController.delete(request: Request, id:String)
-PUT      /api/users/:id           controllers.UserController.update(request: Request, id:String)
+POST          /api/users                      controllers.UserController.save(request: Request)
+GET           /api/users                      controllers.UserController.all(request: Request)
+DELETE        /api/users/:id                  controllers.UserController.delete(request: Request, id:String)
+PUT           /api/users/:id                  controllers.UserController.update(request: Request, id:String)
 
 
 #Dashboards
-GET       /api/dashboard             controllers.DashboardController.all(request: Request, limit: Int ?= 20, skip: Int ?= 0)
-POST      /api/dashboard             controllers.DashboardController.save(request: Request)
-PUT       /api/dashboard/:id         controllers.DashboardController.update(request: Request, id:String)
-DELETE    /api/dashboard/:id         controllers.DashboardController.delete(request: Request, id:String)
-GET       /api/chat/:roomId          controllers.ChatController.chat(roomId: String, token: String)
+GET           /api/dashboard                  controllers.DashboardController.all(request: Request, limit: Int ?= 20, skip: Int ?= 0)
+POST          /api/dashboard                  controllers.DashboardController.save(request: Request)
+PUT           /api/dashboard/:id              controllers.DashboardController.update(request: Request, id:String)
+DELETE        /api/dashboard/:id              controllers.DashboardController.delete(request: Request, id:String)
+GET           /api/chat/:roomId               controllers.ChatController.chat(roomId: String, token: String)
 
 #Contents
-GET           /api/content/:id              controllers.DashboardContentController.all(request: Request,id:String)
-POST          /api/content                  controllers.DashboardContentController.save(request: Request)
-PUT           /api/content/:id              controllers.DashboardContentController.update(request: Request, id:String)
-DELETE        /api/content/:id              controllers.DashboardContentController.delete(request: Request, id:String)
+GET           /api/content/:id                controllers.DashboardContentController.all(request: Request,id:String)
+POST          /api/content                    controllers.DashboardContentController.save(request: Request)
+PUT           /api/content/:id                controllers.DashboardContentController.update(request: Request, id:String)
+DELETE        /api/content/:id                controllers.DashboardContentController.delete(request: Request, id:String)
 
 
 
-GET        /api/dashboard/hierarchy         controllers.DashboardController.hierarchy()
+GET           /api/dashboard/hierarchy        controllers.DashboardController.hierarchy()

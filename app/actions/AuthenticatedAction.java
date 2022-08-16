@@ -50,8 +50,8 @@ public class AuthenticatedAction extends Action<Authenticated> {
             System.out.println("TOKEN IS" + token);
             User user = ServiceUtils
                     .decodeToken(token)
-                    .thenCompose(x->ServiceUtils.getUserFromId(mongoDB,x))
-                    .thenCompose(x -> ServiceUtils.verify(config, x,token))
+                    .thenCompose(x -> ServiceUtils.getUserFromId(mongoDB, x))
+                    .thenCompose(x -> ServiceUtils.verify(config, x, token))
                     .join();
 
             request = request.addAttr(Attributes.USER_TYPED_KEY, user);

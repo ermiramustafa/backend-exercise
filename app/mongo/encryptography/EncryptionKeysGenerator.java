@@ -58,6 +58,7 @@ public class EncryptionKeysGenerator {
     public PublicKey getPublicKey() {
         return this.publicKey;
     }
+
     /**
      * Write to file
      *

@@ -75,7 +75,7 @@ public class DashboardTest extends WithApplication {
         //token from the user
         token = contentAsString(home).replace("\"", "");
 
-        dash1 = new Dashboard("Kids","utilize cross-platform action-items",
+        dash1 = new Dashboard("Kids", "utilize cross-platform action-items",
                 new ObjectId());
         System.out.println("Dashboard test " + dash1);
 //                singletonList("62e257f6dbff353f56ef3024"), singletonList("62ea2bb98f2b3cbbd9d853de"), emptyList());
@@ -173,8 +173,6 @@ public class DashboardTest extends WithApplication {
     }
 
 
-
-
 //    @Test
 //    public void allTest() {
 //        final Http.RequestBuilder request = new Http.RequestBuilder()
@@ -183,7 +181,6 @@ public class DashboardTest extends WithApplication {
 //        final Result result = Helpers.route(app,request);
 //        assertEquals(ok().status(),result.status());
 //    }
-
 
 
 //    @After

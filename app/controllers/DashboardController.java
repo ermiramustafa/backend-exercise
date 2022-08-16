@@ -29,7 +29,7 @@ public class DashboardController extends Controller {
 //    @Validation(type = Dashboard.class)
     public CompletableFuture<Result> save(Http.Request request) {
         return serializationService.parseBodyOfType(request, Dashboard.class)
-                .thenCompose((data) -> service.save( data))
+                .thenCompose((data) -> service.save(data))
                 .thenCompose((data) -> serializationService.toJsonNode(data))
                 .thenApply(Results::ok)
                 .exceptionally(DatabaseUtils::throwableToResult);
@@ -43,13 +43,14 @@ public class DashboardController extends Controller {
 //                .exceptionally(DatabaseUtils::throwableToResult);
 //    }
 
-//    @Authenticated
+    //    @Authenticated
     public CompletableFuture<Result> all(Http.Request request, int limit, int skip) {
         return service.all(ServiceUtils.getUserFrom(request), limit, skip)
                 .thenCompose((data) -> serializationService.toJsonNode(data))
                 .thenApply(Results::ok)
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
+
     //@Validation(type = Dashboard.class)
     public CompletableFuture<Result> update(Http.Request request, String id) {
         System.out.println("Testcontro");

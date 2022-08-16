@@ -22,6 +22,7 @@ public class UserController {
 
     @Inject
     SerializationService serializationService;
+
     public CompletableFuture<Result> all(Http.Request request) {
         return userService.all()
                 .thenCompose(users -> serializationService.toJsonNode(users))
@@ -36,7 +37,7 @@ public class UserController {
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
 
-    public CompletableFuture<Result> delete (Http.Request request, String id) {
+    public CompletableFuture<Result> delete(Http.Request request, String id) {
         return userService.delete(id)
                 .thenCompose(user -> serializationService.toJsonNode(user))
                 .thenApply(Results::ok)
@@ -45,13 +46,14 @@ public class UserController {
 
     @BodyParser.Of(BodyParser.Json.class)
     //@Validation(type = User.class)
-    public CompletableFuture<Result> update (Http.Request request, String id) {
+    public CompletableFuture<Result> update(Http.Request request, String id) {
         return serializationService.parseBodyOfType(request, User.class)
                 .thenCompose(user -> userService.update(id, user))
                 .thenCompose(user -> serializationService.toJsonNode(user))
                 .thenApply(Results::ok)
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
+
     @BodyParser.Of(BodyParser.Json.class)
     //@Validation(type = User.class)
     public CompletableFuture<Result> save(Http.Request request) {
@@ -61,7 +63,6 @@ public class UserController {
                 .thenApply(Results::ok)
                 .exceptionally(DatabaseUtils::throwableToResult);
     }
-
 
 
 }

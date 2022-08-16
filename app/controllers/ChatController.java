@@ -1,4 +1,5 @@
 package controllers;
+
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;
 import com.auth0.jwt.JWT;
@@ -100,17 +101,17 @@ public class ChatController extends Controller {
 //            });
 //        }
 
-    public WebSocket chat (String roomId, String token) {
+    public WebSocket chat(String roomId, String token) {
         return WebSocket.Text.acceptOrResult(request -> {
             User user = ServiceUtils
                     .decodeToken(token)
                     .thenCompose(x -> ServiceUtils.getUserFromId(mongoDB, x))
-                    .thenCompose(x -> ServiceUtils.verify(config, x,token))
+                    .thenCompose(x -> ServiceUtils.verify(config, x, token))
                     .join();
 
             System.out.println("User is : " + user);
 
-            MongoCollection<ChatRooom> collection =  mongoDB.getMongoDatabase()
+            MongoCollection<ChatRooom> collection = mongoDB.getMongoDatabase()
                     .getCollection("rooms", ChatRooom.class);
             ChatRooom room = collection.find(Filters.eq("_id", new ObjectId(roomId)))
                     .first();
@@ -140,10 +141,6 @@ public class ChatController extends Controller {
 
         });
     }
-
-
-
-
 
 
 }

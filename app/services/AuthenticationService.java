@@ -32,14 +32,14 @@ public class AuthenticationService {
 
     public CompletableFuture<String> authenticate(AuthenticationModel login) {
         return CompletableFuture.supplyAsync(() -> {
-            try{
+            try {
                 System.out.println("ketuuu");
                 MongoCollection<User> collection = mongoDB.getMongoDatabase()
                         .getCollection("users", User.class);
                 String secret = config.getString("play.http.secret.key");
                 Algorithm algorithm = Algorithm.HMAC256(secret);
                 System.out.println("ketuuu22");
-                if(Strings.isNullOrEmpty(login.getUsername()) || Strings.isNullOrEmpty(login.getPassword())) {
+                if (Strings.isNullOrEmpty(login.getUsername()) || Strings.isNullOrEmpty(login.getPassword())) {
                     throw new RequestException(Http.Status.BAD_REQUEST, "Empty fields");
                 }
                 System.out.println("ketuuu3");
@@ -48,17 +48,17 @@ public class AuthenticationService {
                 ).first();
                 System.out.println("ketuuu4");
 
-                if(!Hash.checkPassword(login.getPassword(), u1.getPassword())) {
+                if (!Hash.checkPassword(login.getPassword(), u1.getPassword())) {
                     throw new CompletionException(new RequestException(Http.Status.UNAUTHORIZED, Json.toJson("Bad Credentials!")));
                 }
 
-                System.out.println("id e userit"+u1);
+                System.out.println("id e userit" + u1);
 
                 return JWT.create()
                         .withIssuer(u1.getId().toString())
                         .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
                         .sign(algorithm);
-            }catch (Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
                 throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, "Could not fetch data-test!"));
             }

@@ -32,7 +32,7 @@ public class EncryptionUtil {
      *
      * @return keyFactory generated private file
      * @throws Exception IoException
-     * Document https://docs.oracle.com/javase/8/docs/api/java/security/spec/PKCS8EncodedKeySpec.html
+     *                   Document https://docs.oracle.com/javase/8/docs/api/java/security/spec/PKCS8EncodedKeySpec.html
      */
     public PrivateKey getPrivateKeyFromFile(String privateKeyFile, String encryptionType) throws Exception {
         byte[] keyBytes = Files.readAllBytes(new File(privateKeyFile).toPath());
@@ -44,7 +44,7 @@ public class EncryptionUtil {
      *
      * @return keyFactory generated private file
      * @throws Exception IoException
-     * Document https://docs.oracle.com/javase/8/docs/api/java/security/spec/PKCS8EncodedKeySpec.html
+     *                   Document https://docs.oracle.com/javase/8/docs/api/java/security/spec/PKCS8EncodedKeySpec.html
      */
     public PrivateKey getPrivateKeyFromBytes(byte[] privateKey, String encryptionType) throws Exception {
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(privateKey);
@@ -57,8 +57,8 @@ public class EncryptionUtil {
      *
      * @return keyFactory generated public file
      * @throws Exception Exception
-     * Document https://docs.oracle.com/javase/8/docs/api/java/security/spec/X509EncodedKeySpec.html
-     * byte[] data1 = "0123456789".getBytes("UTF-8");
+     *                   Document https://docs.oracle.com/javase/8/docs/api/java/security/spec/X509EncodedKeySpec.html
+     *                   byte[] data1 = "0123456789".getBytes("UTF-8");
      */
     public PublicKey getPublicKeyFromFile(String publicKey, String encryptionType) throws Exception {
         byte[] keyBytes = Files.readAllBytes(new File(publicKey).toPath());
@@ -70,8 +70,8 @@ public class EncryptionUtil {
      *
      * @return keyFactory generated public file
      * @throws Exception Exception
-     * Document https://docs.oracle.com/javase/8/docs/api/java/security/spec/X509EncodedKeySpec.html
-     * byte[] data1 = "0123456789".getBytes("UTF-8");
+     *                   Document https://docs.oracle.com/javase/8/docs/api/java/security/spec/X509EncodedKeySpec.html
+     *                   byte[] data1 = "0123456789".getBytes("UTF-8");
      */
     public PublicKey getPublicKeyFromBytes(byte[] publicKey, String encryptionType) throws Exception {
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey);

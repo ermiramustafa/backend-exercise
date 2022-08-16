@@ -189,7 +189,7 @@ public class DashboardService {
             List<Content> contents = mongoDB.getMongoDatabase()
                     .getCollection("content", Content.class)
                     .find()
-                    .filter(Filters.in("dashboardId" , objid))
+                    .filter(Filters.in("dashboardId", objid))
                     .into(new ArrayList<>());
             flatOption.forEach(dash -> {
                 dash.setContent(contents.stream().filter(x -> x.getDashboardId().equals(dash.getId())).collect(Collectors.toList()));

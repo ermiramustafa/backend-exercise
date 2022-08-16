@@ -27,7 +27,7 @@ public class UserService {
     @Inject
     IMongoDB mongoDB;
 
-    public CompletableFuture<List<User>> all () {
+    public CompletableFuture<List<User>> all() {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return mongoDB.getMongoDatabase()
@@ -44,11 +44,11 @@ public class UserService {
 
     public CompletableFuture<User> userById(String id) {
         return CompletableFuture.supplyAsync(() -> {
-            try{
-                if(!ObjectId.isValid(id)) {
+            try {
+                if (!ObjectId.isValid(id)) {
                     throw new RequestException(Http.Status.BAD_REQUEST, "badd");
                 }
-                User u1 =  mongoDB.getMongoDatabase()
+                User u1 = mongoDB.getMongoDatabase()
                         .getCollection("users", User.class)
                         .find()
                         .filter(Filters.eq("_id", new ObjectId(id)))
@@ -58,7 +58,7 @@ public class UserService {
                 }
                 return u1;
 
-            }catch(Exception ex) {
+            } catch (Exception ex) {
                 throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, Json.toJson("Could not fetch data!")));
             }
         }, ec.current());
@@ -67,41 +67,40 @@ public class UserService {
 
     public CompletableFuture<User> delete(String id) {
         return CompletableFuture.supplyAsync(() -> {
-            try{
-                if(!ObjectId.isValid(id)) {
+            try {
+                if (!ObjectId.isValid(id)) {
                     throw new RequestException(Http.Status.BAD_REQUEST, "badd2");
                 }
 
-                User user= mongoDB.getMongoDatabase()
+                User user = mongoDB.getMongoDatabase()
                         .getCollection("users", User.class)
                         .findOneAndDelete(Filters.eq("_id", new ObjectId(id)));
 
-                if(user == null){
+                if (user == null) {
                     throw new RequestException(NOT_FOUND, "Document with id: " + id + " not found!");
                 }
                 return user;
-            }
-            catch(Exception ex) {
+            } catch (Exception ex) {
                 throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, Json.toJson("Could not fetch data!")));
             }
-        },ec.current());
+        }, ec.current());
     }
 
-    public CompletableFuture<User> update (String id, User user) {
+    public CompletableFuture<User> update(String id, User user) {
         return CompletableFuture.supplyAsync(() ->
         {
-            try{
+            try {
                 System.out.println("Testo testo testo");
-                if(!ObjectId.isValid(id)) {
+                if (!ObjectId.isValid(id)) {
                     throw new RequestException(Http.Status.BAD_REQUEST, "bad request");
                 }
-               return mongoDB.getMongoDatabase()
+                return mongoDB.getMongoDatabase()
                         .getCollection("users", User.class)
                         .findOneAndReplace(Filters.eq("_id", new ObjectId(id)), user);
-            }catch(Exception ex) {
+            } catch (Exception ex) {
                 throw new CompletionException(new RequestException(Http.Status.BAD_REQUEST, Json.toJson("Could not fetch data!")));
             }
-        },ec.current());
+        }, ec.current());
     }
 
     public CompletableFuture<User> save(User user) {

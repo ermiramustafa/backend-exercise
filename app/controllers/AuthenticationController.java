@@ -48,7 +48,7 @@ public class AuthenticationController extends Controller {
         return ok(views.html.index.render());
     }*/
 
-//    public Result authenticate(Http.Request request) {
+    //    public Result authenticate(Http.Request request) {
 //        JsonNode node =request.body().asJson();
 //        try {
 //            User user = new User("ermiramustafa", "password");

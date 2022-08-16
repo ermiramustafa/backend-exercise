@@ -11,16 +11,16 @@ import java.io.IOException;
 
 public class ObjectIdDeSerializer extends JsonDeserializer<ObjectId> {
 
-	@Override
-	public ObjectId deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-		JsonNode node = jp.getCodec().readTree(jp);
-		if(node.get("$oid") != null) {
-			String objectId = node.get("$oid").asText();
-			return new ObjectId(objectId);
-		}
-		if (node.isTextual()) {
-			return new ObjectId(node.asText());
-		}
-		return null;
-	}
+    @Override
+    public ObjectId deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+        JsonNode node = jp.getCodec().readTree(jp);
+        if (node.get("$oid") != null) {
+            String objectId = node.get("$oid").asText();
+            return new ObjectId(objectId);
+        }
+        if (node.isTextual()) {
+            return new ObjectId(node.asText());
+        }
+        return null;
+    }
 }

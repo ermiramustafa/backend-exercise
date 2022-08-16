@@ -15,17 +15,16 @@ import java.util.concurrent.CompletionStage;
 public class ValidationAction extends Action<Validation> {
     @Override
     public CompletionStage<Result> call(Http.Request request) {
-        try{
+        try {
             JsonNode body = request.body().asJson();
             Object object = Json.fromJson(body, configuration.type());
 
             String errors = HibernateValidator.validate(object);
-            if(!Strings.isNullOrEmpty(errors)) {
+            if (!Strings.isNullOrEmpty(errors)) {
                 return CompletableFuture.completedFuture(badRequest(Json.toJson(errors)));
             }
             return delegate.call(request);
-        }
-        catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             ObjectNode response = Json.newObject();
             response.put("message", "Invalid object supplied ---error here");

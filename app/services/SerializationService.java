@@ -63,7 +63,7 @@ public class SerializationService {
         return CompletableFuture.supplyAsync(() -> this.syncParseBodyOfType(request, valueType), ec.current());
     }
 
-    public <T> T syncParseBodyOfType (Request request, Class<T> valueType) {
+    public <T> T syncParseBodyOfType(Request request, Class<T> valueType) {
         try {
             Optional<T> body = request.body().parseJson(valueType);
             if (!body.isPresent()) {
@@ -116,18 +116,17 @@ public class SerializationService {
 //    }
 
 
-
-    public JsonNode fileToObjectNode (File which) throws IOException {
+    public JsonNode fileToObjectNode(File which) throws IOException {
         try (JsonParser parser = mapper.getFactory().createParser(which)) {
             return mapper.readTree(parser);
         }
     }
 
-    public <T> CompletableFuture<List<T>> parseListBodyOfType (Request request, Class<T> type) {
+    public <T> CompletableFuture<List<T>> parseListBodyOfType(Request request, Class<T> type) {
         return CompletableFuture.supplyAsync(() -> this.syncParseListBodyOfType(request, type), ec.current());
     }
 
-    public <T> List<T> syncParseListBodyOfType (Request request, Class<T> type) {
+    public <T> List<T> syncParseListBodyOfType(Request request, Class<T> type) {
         JsonNode json = request.body().asJson();
         return DatabaseUtils.parseJsonListOfType(json, type);
     }

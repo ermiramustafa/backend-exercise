@@ -49,6 +49,7 @@ public @Data class Dashboard extends BaseModel {
         clone.setParentId(this.parentId);
         return clone;
     }
+
     public void addChild(Dashboard dashboard) {
         children.add(dashboard);
     }

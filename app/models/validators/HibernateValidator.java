@@ -26,7 +26,7 @@ public class HibernateValidator {
         return validator.validate(t);
     }
 
-    private static <T> String formatErrors (Set<ConstraintViolation<T>> errors) {
+    private static <T> String formatErrors(Set<ConstraintViolation<T>> errors) {
         return errors.stream()
                 .map((error) -> String.format("%s %s", Strings.capitalize(error.getPropertyPath().toString()), error.getMessage()))
                 .collect(Collectors.joining(", "));
