@@ -3,6 +3,7 @@ package modules;
 import com.google.inject.AbstractModule;
 import com.typesafe.config.Config;
 import mongo.IMongoDB;
+import mongo.InMemoryMongoDB;
 import mongo.MongoDB;
 import play.Environment;
 import play.Logger;
@@ -20,10 +21,10 @@ public class DatabaseModule extends AbstractModule {
     protected void configure() {
 		String mode = config.getString("mode");
 		Logger.of(this.getClass()).debug("Runnning on mode {}" + mode);
-//		if (mode.equalsIgnoreCase("test")) {
-//            bind(IMongoDB.class).to(InMemoryMongoDB.class).asEagerSingleton();
-//            return;
-//		}
+		if (mode.equalsIgnoreCase("test")) {
+            bind(IMongoDB.class).to(InMemoryMongoDB.class).asEagerSingleton();
+            return;
+		}
         bind(IMongoDB.class).to(MongoDB.class).asEagerSingleton();
     }
 }

@@ -35,6 +35,12 @@ public @Data class Dashboard extends BaseModel {
 
     List<Content> content = new ArrayList<>();
 
+    public Dashboard(String name, String description, ObjectId parentId) {
+        this.name = name;
+        this.description = description;
+        this.parentId = parentId;
+    }
+
     @Override
     public Dashboard clone() throws CloneNotSupportedException {
         Dashboard clone = (Dashboard) super.clone();
